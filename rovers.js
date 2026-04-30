@@ -48,7 +48,7 @@ const ROVERS = {
     launched: 'Jul 7, 2003',
     crater: 'Meridiani Planum',
     lat: -1.9462, lon: -5.5266,
-    color: '#e8631a',
+    color: '#ff69b4',
     status: 'COMPLETE',
     desc: 'A legend. Oppy was designed to last 90 days and lasted 15 YEARS. She completed the first Mars marathon and transformed our understanding of Mars\'s watery history.',
     facts: [
@@ -67,7 +67,7 @@ const ROVERS = {
     launched: 'Jun 10, 2003',
     crater: 'Gusev Crater',
     lat: -14.5718, lon: 175.4785,
-    color: '#e8631a',
+    color: '#44ff88',
     status: 'COMPLETE',
     desc: 'Opportunity\'s twin sister! Spirit climbed Martian hills, survived harrowing dust storms, and found evidence of ancient hot springs - a place where life could have existed.',
     facts: [
@@ -86,7 +86,7 @@ const ROVERS = {
     launched: 'Dec 4, 1996',
     crater: 'Ares Vallis',
     lat: 19.09, lon: -33.22,
-    color: '#c1440e',
+    color: '#ffdd44',
     status: 'COMPLETE',
     desc: 'The pioneer that started it all! Sojourner was the FIRST wheeled robot ever to drive on another planet. Everything that came after owes its existence to this tiny trailblazer.',
     facts: [

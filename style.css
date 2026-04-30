@@ -307,7 +307,7 @@ nav button.active {
 }
 .legend-item {
   display: flex; align-items: center; gap: 0.5rem;
-  color: var(--text2); font-size: 0.72rem;
+  color: var(--text); font-size: 0.72rem;
 }
 .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
 #path-status { font-size: 0.68rem; color: var(--text2); }
