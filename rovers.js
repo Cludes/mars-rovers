@@ -340,37 +340,71 @@ function replayJourney() {
 
   const btn = document.getElementById('replay-btn');
   btn.disabled = true;
-  btn.textContent = 'Replaying...';
+  btn.textContent = '⏹ Stop';
+  let stopped = false;
+  btn.onclick = () => { stopped = true; };
 
   // Remove existing paths
   for (const [k, layer] of Object.entries(pathLayers)) {
-    marsMap.removeLayer(layer);
+    if (layer) marsMap.removeLayer(layer);
     pathLayers[k] = null;
   }
 
-  let maxLen = Math.max(...keys.map(k => replayData[k].length));
-  let i = 0;
-  const tempLines = {};
-  for (const k of keys) tempLines[k] = L.polyline([], { color: ROVERS[k].color, weight: 2.5 }).addTo(marsMap);
+  // Zoom map to fit all path data
+  const allPts = keys.flatMap(k => replayData[k]);
+  if (allPts.length) marsMap.fitBounds(L.latLngBounds(allPts), { padding: [40, 40], animate: true, duration: 1 });
 
+  const tempLines = {};
+  for (const k of keys) {
+    tempLines[k] = L.polyline([], {
+      color: ROVERS[k].color, weight: 4, opacity: 0.9
+    }).addTo(marsMap);
+  }
+
+  const maxLen = Math.max(...keys.map(k => replayData[k].length));
+  // Draw 5 waypoints per frame so it completes in ~4 seconds
+  const STEP = Math.max(1, Math.ceil(maxLen / 200));
+  let i = 0;
   const info = document.getElementById('replay-info');
-  const interval = setInterval(() => {
-    for (const k of keys) {
-      const pts = replayData[k];
-      if (i < pts.length) tempLines[k].addLatLng(pts[i]);
-    }
-    const pct = Math.round((i / maxLen) * 100);
-    info.textContent = `Replaying... ${pct}%`;
-    i++;
-    if (i >= maxLen) {
-      clearInterval(interval);
+
+  const tick = () => {
+    if (stopped) {
+      // Restore full paths immediately
+      for (const k of keys) {
+        marsMap.removeLayer(tempLines[k]);
+        pathLayers[k] = L.polyline(replayData[k], { color: ROVERS[k].color, weight: 2, opacity: 0.8 }).addTo(marsMap);
+      }
       btn.disabled = false;
       btn.textContent = '▶ REPLAY JOURNEY';
+      btn.onclick = replayJourney;
+      info.textContent = 'Stopped';
+      return;
+    }
+
+    for (let s = 0; s < STEP; s++) {
+      for (const k of keys) {
+        const pts = replayData[k];
+        if (i < pts.length) tempLines[k].addLatLng(pts[i]);
+      }
+      i++;
+    }
+
+    const pct = Math.min(100, Math.round((i / maxLen) * 100));
+    info.textContent = `Replaying... ${pct}%`;
+
+    if (i < maxLen) {
+      requestAnimationFrame(tick);
+    } else {
+      btn.disabled = false;
+      btn.textContent = '▶ REPLAY JOURNEY';
+      btn.onclick = replayJourney;
       info.textContent = 'Replay complete';
-      // Restore full paths
       for (const k of keys) pathLayers[k] = tempLines[k];
     }
-  }, 20);
+  };
+
+  // Short delay so fitBounds animation starts first
+  setTimeout(() => requestAnimationFrame(tick), 1200);
 }
 
 // ============================================================
