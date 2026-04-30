@@ -1,6 +1,3 @@
-// NASA_KEY is injected by CI into nasa-key.js (loaded before this script)
-// Falls back to DEMO_KEY if nasa-key.js isn't present (local dev)
-if (typeof NASA_KEY === 'undefined') var NASA_KEY = 'DEMO_KEY';
 const NASA_BASE = 'https://api.nasa.gov/mars-photos/api/v1';
 
 const MARS_SOL = 88775.244; // Earth seconds per Mars sol
@@ -182,23 +179,21 @@ function funDistance(km) {
 }
 
 // ============================================================
-// NASA API - ROVER MANIFEST
+// DATA - loaded from pre-fetched data/rovers.json (key never hits the browser)
 // ============================================================
-async function fetchManifest(roverName) {
-  try {
-    const r = await fetch(`${NASA_BASE}/manifests/${roverName}?api_key=${NASA_KEY}`);
-    if (!r.ok) { console.warn(`Manifest ${roverName}: HTTP ${r.status}`); return null; }
-    return (await r.json()).photo_manifest;
-  } catch (e) { console.warn(`Manifest ${roverName}: ${e}`); return null; }
-}
+let roverData = null;
 
-async function fetchLatestPhotos(roverName, count = 8) {
+async function loadRoverData() {
+  if (roverData) return roverData;
   try {
-    const r = await fetch(`${NASA_BASE}/rovers/${roverName}/latest_photos?api_key=${NASA_KEY}`);
-    if (!r.ok) { console.warn(`Photos ${roverName}: HTTP ${r.status}`); return []; }
-    const d = await r.json();
-    return (d.latest_photos || []).slice(0, count);
-  } catch (e) { console.warn(`Photos ${roverName}: ${e}`); return []; }
+    const r = await fetch('data/rovers.json');
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    roverData = await r.json();
+    return roverData;
+  } catch (e) {
+    console.warn('data/rovers.json unavailable:', e);
+    return null;
+  }
 }
 
 // ============================================================
@@ -208,36 +203,29 @@ async function initStatus() {
   updateSolCounters();
   setInterval(updateSolCounters, 30000);
 
-  // Manifests for distance + photo count
-  // Note: NASA manifest API does not include total_distance_km - we estimate from sol count
-  const [pm, cm] = await Promise.all([
-    fetchManifest('perseverance'),
-    fetchManifest('curiosity')
-  ]);
+  const data = await loadRoverData();
 
-  const apiOk = pm || cm;
+  const apiOk = data && (data.perseverance?.manifest || data.curiosity?.manifest);
   document.getElementById('api-status').style.display = apiOk ? 'none' : 'flex';
 
+  const pm = data?.perseverance?.manifest;
+  const cm = data?.curiosity?.manifest;
+
   if (pm) {
-    // ~28 km driven over 1845 sols ≈ 0.0152 km/sol
     const percyEst = (pm.max_sol * 0.0152).toFixed(1);
     document.getElementById('percy-dist').textContent = `~${percyEst} km`;
     document.getElementById('percy-dist-fun').textContent = funDistance(parseFloat(percyEst));
     document.getElementById('percy-photos').textContent = pm.total_photos.toLocaleString();
   }
   if (cm) {
-    // ~33 km driven over 4880 sols ≈ 0.00677 km/sol
     const curioEst = (cm.max_sol * 0.00677).toFixed(1);
     document.getElementById('curiosity-dist').textContent = `~${curioEst} km`;
     document.getElementById('curiosity-dist-fun').textContent = funDistance(parseFloat(curioEst));
     document.getElementById('curiosity-photos').textContent = cm.total_photos.toLocaleString();
   }
 
-  // Latest photos
-  const [pp, cp] = await Promise.all([
-    fetchLatestPhotos('perseverance', 6),
-    fetchLatestPhotos('curiosity', 6)
-  ]);
+  const pp = data?.perseverance?.latest_photos?.slice(0, 6) || [];
+  const cp = data?.curiosity?.latest_photos?.slice(0, 6) || [];
   renderLatestPhotos('percy-latest-photo', pp);
   renderLatestPhotos('curiosity-latest-photo', cp);
 }
@@ -386,10 +374,9 @@ async function initPhotos() {
   photosFetched = true;
   document.getElementById('photo-grid').innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--dim);padding:3rem">Loading photos from Mars...</div>';
 
-  const [pp, cp] = await Promise.all([
-    fetchLatestPhotos('perseverance', 30),
-    fetchLatestPhotos('curiosity', 30)
-  ]);
+  const data = await loadRoverData();
+  const pp = data?.perseverance?.latest_photos || [];
+  const cp = data?.curiosity?.latest_photos || [];
 
   allPhotos = [
     ...pp.map(p => ({ ...p, roverKey: 'perseverance' })),

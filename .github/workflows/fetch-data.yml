@@ -1,0 +1,54 @@
+﻿name: Fetch Rover Data
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fetch and save rover data
+        env:
+          NASA_API_KEY: ${{ secrets.NASA_API_KEY }}
+        run: |
+          BASE="https://api.nasa.gov/mars-photos/api/v1"
+          curl -sf "$BASE/manifests/perseverance?api_key=$NASA_API_KEY" > /tmp/pm.json
+          curl -sf "$BASE/manifests/curiosity?api_key=$NASA_API_KEY"    > /tmp/cm.json
+          curl -sf "$BASE/rovers/perseverance/latest_photos?api_key=$NASA_API_KEY" > /tmp/pp.json
+          curl -sf "$BASE/rovers/curiosity/latest_photos?api_key=$NASA_API_KEY"    > /tmp/cp.json
+          python3 - <<'PYEOF'
+          import json, sys
+          from datetime import datetime, timezone
+          def load(path):
+              try: return json.load(open(path))
+              except Exception as e: print(f"parse error {path}: {e}", file=sys.stderr); return {}
+          pm = load('/tmp/pm.json').get('photo_manifest', {})
+          cm = load('/tmp/cm.json').get('photo_manifest', {})
+          pp = load('/tmp/pp.json').get('latest_photos', [])[:30]
+          cp = load('/tmp/cp.json').get('latest_photos', [])[:30]
+          def slim(photos):
+              return [{'img_src':p['img_src'],'sol':p['sol'],
+                       'camera':{'full_name':p['camera']['full_name']},
+                       'rover':{'name':p['rover']['name']}} for p in photos]
+          out = {'fetched_at':datetime.now(timezone.utc).isoformat(),
+                 'perseverance':{'manifest':pm,'latest_photos':slim(pp)},
+                 'curiosity':   {'manifest':cm,'latest_photos':slim(cp)}}
+          json.dump(out, open('data/rovers.json','w'))
+          print(f"Saved - Percy: {len(pp)} photos, Curiosity: {len(cp)} photos")
+          PYEOF
+
+      - name: Commit updated data
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/rovers.json
+          git diff --cached --quiet || git commit -m "chore: update rover data [skip ci]"
+          git push
