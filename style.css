@@ -276,9 +276,10 @@ nav button.active {
 #map-wrap {
   display: grid;
   grid-template-columns: 1fr 200px;
-  flex: 1; min-height: 0;
+  flex: 1; min-height: 0; height: 100%;
+  overflow: hidden;
 }
-#mars-map { min-height: 0; }
+#mars-map { height: 100%; min-height: 0; }
 
 #map-legend {
   background: rgba(10,3,5,0.97);

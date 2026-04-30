@@ -1,4 +1,5 @@
-const NASA_KEY = '__NASA_API_KEY__';
+// Falls back to DEMO_KEY when the CI placeholder hasn't been replaced
+const NASA_KEY = (() => { const k = '__NASA_API_KEY__'; return k === '__NASA_API_KEY__' ? 'DEMO_KEY' : k; })();
 const NASA_BASE = 'https://api.nasa.gov/mars-photos/api/v1';
 
 const MARS_SOL = 88775.244; // Earth seconds per Mars sol
@@ -233,7 +234,10 @@ async function initStatus() {
 
 function renderLatestPhotos(containerId, photos) {
   const el = document.getElementById(containerId);
-  if (!photos.length) { el.textContent = 'No photos available'; return; }
+  if (!photos.length) {
+    el.closest('.card-photo-strip').style.display = 'none';
+    return;
+  }
   el.innerHTML = photos.map(p => `
     <img src="${p.img_src}" alt="Mars photo" title="${p.camera.full_name} - Sol ${p.sol}"
          onclick="openLightbox('${p.img_src}','${p.camera.full_name} - Sol ${p.sol} - ${p.rover.name}')">
@@ -258,10 +262,14 @@ function initMap() {
   });
 
   // MOLA colour elevation tiles - beautiful & reliable
-  L.tileLayer('https://s3-eu-west-1.amazonaws.com/whereonmars.cartodb.net/mola-color/{z}/{x}/{y}.png', {
+  const tiles = L.tileLayer('https://s3-eu-west-1.amazonaws.com/whereonmars.cartodb.net/mola-color/{z}/{x}/{y}.png', {
     maxZoom: 10, tms: false, noWrap: true,
     bounds: [[-90, -180], [90, 180]]
   }).addTo(marsMap);
+  tiles.on('tileerror', e => { e.tile.style.visibility = 'hidden'; });
+
+  // Leaflet needs the container to have a rendered size before it can calculate layout
+  setTimeout(() => marsMap.invalidateSize(), 100);
 
   // Place all rover markers
   for (const [key, r] of Object.entries(ROVERS)) {
