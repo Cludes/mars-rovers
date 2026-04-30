@@ -250,14 +250,16 @@ function initMap() {
   mapInited = true;
 
   marsMap = L.map('mars-map', {
-    center: [0, 180], zoom: 2,
+    center: [0, 90], zoom: 2,
     attributionControl: false, zoomControl: true,
-    worldCopyJump: false, minZoom: 1, maxZoom: 10
+    worldCopyJump: false, minZoom: 1, maxZoom: 10,
+    maxBounds: [[-90, -180], [90, 180]],
+    maxBoundsViscosity: 1.0
   });
 
   // MOLA colour elevation tiles - beautiful & reliable
   L.tileLayer('https://s3-eu-west-1.amazonaws.com/whereonmars.cartodb.net/mola-color/{z}/{x}/{y}.png', {
-    maxZoom: 10, tms: false,
+    maxZoom: 10, tms: false, noWrap: true,
     bounds: [[-90, -180], [90, 180]]
   }).addTo(marsMap);
 
