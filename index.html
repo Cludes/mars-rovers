@@ -162,13 +162,6 @@
       <span id="photo-count-label"></span>
     </div>
     <div id="photo-grid"></div>
-    <div id="photo-lightbox" class="hidden" onclick="closeLightbox()">
-      <button id="lightbox-close" onclick="closeLightbox()" aria-label="Close">&times;</button>
-      <div id="lightbox-inner" onclick="event.stopPropagation()">
-        <img id="lightbox-img" src="" alt="Mars photo">
-        <div id="lightbox-info"></div>
-      </div>
-    </div>
   </section>
 
   <!-- ===== OPPORTUNITY TAB ===== -->
@@ -318,6 +311,15 @@
     <div id="rovers-intro">Five robots. One planet. Millions of discoveries.</div>
     <div id="rover-cards"></div>
   </section>
+
+  <!-- Lightbox lives at body level so it's in the root stacking context -->
+  <div id="photo-lightbox" class="hidden" onclick="closeLightbox()">
+    <button id="lightbox-close" onclick="closeLightbox()" aria-label="Close">&times;</button>
+    <div id="lightbox-inner" onclick="event.stopPropagation()">
+      <img id="lightbox-img" src="" alt="Mars photo">
+      <div id="lightbox-info"></div>
+    </div>
+  </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="rovers.js"></script>
