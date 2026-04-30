@@ -163,7 +163,7 @@ nav button.active {
   grid-template-columns: 1fr 1fr;
   gap: 1.6rem;
   padding: 1.6rem;
-  flex: 1; min-height: 0; overflow-y: auto;
+  align-content: start;
 }
 
 .rover-status-card {
@@ -339,7 +339,6 @@ nav button.active {
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 0.7rem;
   padding: 1rem 1.2rem 1.2rem;
-  overflow-y: auto; flex: 1;
   align-content: start;
 }
 .photo-card {
@@ -483,7 +482,7 @@ nav button.active {
   grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
   gap: 1.5rem;
   padding: 1.6rem;
-  overflow-y: auto; flex: 1; align-content: start;
+  align-content: start;
 }
 
 .rover-card {
