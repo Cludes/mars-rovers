@@ -1,5 +1,5 @@
-// CI injects the real key via sed; falls back to DEMO_KEY if secret not set (empty string)
-const NASA_KEY = '__NASA_API_KEY__' || 'DEMO_KEY';
+// Replaced by CI: sed replaces this whole line with the real key
+const NASA_KEY = 'DEMO_KEY';
 const NASA_BASE = 'https://api.nasa.gov/mars-photos/api/v1';
 
 const MARS_SOL = 88775.244; // Earth seconds per Mars sol

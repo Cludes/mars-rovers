@@ -25,7 +25,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Inject NASA API Key
-        run: sed -i "s/__NASA_API_KEY__/${{ secrets.NASA_API_KEY }}/g" rovers.js
+        run: sed -i "s/const NASA_KEY = 'DEMO_KEY'/const NASA_KEY = '${{ secrets.NASA_API_KEY }}'/g" rovers.js
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
