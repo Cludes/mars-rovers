@@ -375,12 +375,18 @@ async function initPhotos() {
   document.getElementById('photo-grid').innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--dim);padding:3rem">Loading photos from Mars...</div>';
 
   const data = await loadRoverData();
-  const pp = data?.perseverance?.latest_photos || [];
-  const cp = data?.curiosity?.latest_photos || [];
+  const pp  = data?.perseverance?.latest_photos || [];
+  const cp  = data?.curiosity?.latest_photos    || [];
+  const op  = data?.opportunity?.latest_photos  || [];
+  const sp  = data?.spirit?.latest_photos       || [];
+  const dev = data?.development                 || [];
 
   allPhotos = [
     ...pp.map(p => ({ ...p, roverKey: 'perseverance' })),
-    ...cp.map(p => ({ ...p, roverKey: 'curiosity' }))
+    ...cp.map(p => ({ ...p, roverKey: 'curiosity' })),
+    ...op.map(p => ({ ...p, roverKey: 'opportunity' })),
+    ...sp.map(p => ({ ...p, roverKey: 'spirit' })),
+    ...dev.map(p => ({ ...p, roverKey: 'development' }))
   ];
 
   renderPhotoGrid();
@@ -402,7 +408,7 @@ function renderPhotoGrid() {
       <div class="photo-card-info">
         <div class="photo-rover">${p.rover.name.toUpperCase()}</div>
         <div class="photo-camera">${p.camera.full_name}</div>
-        <div class="photo-sol">Sol ${p.sol}</div>
+        <div class="photo-sol">${p.sol ? 'Sol ' + p.sol : 'Development'}</div>
       </div>
     </div>
   `).join('');

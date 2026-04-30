@@ -18,22 +18,24 @@ jobs:
       - name: Fetch and save rover data
         run: |
           BASE="https://images-api.nasa.gov"
-          curl -s -w "\nHTTP %{http_code} %{url_effective}\n" -o /tmp/pp.json "$BASE/search?q=perseverance+mars+sol&media_type=image&page_size=30&year_start=2024"
-          curl -s -w "\nHTTP %{http_code} %{url_effective}\n" -o /tmp/cp.json "$BASE/search?q=curiosity+mars+sol&media_type=image&page_size=30&year_start=2024"
+          curl -s -o /tmp/pp.json  "$BASE/search?q=perseverance+mars+sol&media_type=image&page_size=30&year_start=2024"
+          curl -s -o /tmp/cp.json  "$BASE/search?q=curiosity+mars+sol&media_type=image&page_size=30&year_start=2022"
+          curl -s -o /tmp/op.json  "$BASE/search?q=opportunity+rover+mars&media_type=image&page_size=20"
+          curl -s -o /tmp/sp.json  "$BASE/search?q=spirit+rover+mars&media_type=image&page_size=20"
+          curl -s -o /tmp/dev.json "$BASE/search?q=mars+rover+build+assembly+laboratory&media_type=image&page_size=30"
           echo "--- file sizes ---"
-          wc -c /tmp/pp.json /tmp/cp.json
-          [ -s /tmp/pp.json ] || echo '{"collection":{"items":[],"metadata":{"total_hits":0}}}' > /tmp/pp.json
-          [ -s /tmp/cp.json ] || echo '{"collection":{"items":[],"metadata":{"total_hits":0}}}' > /tmp/cp.json
+          wc -c /tmp/pp.json /tmp/cp.json /tmp/op.json /tmp/sp.json /tmp/dev.json
           python3 - <<'PYEOF'
           import json, sys, re
           from datetime import datetime, timezone
+          EMPTY = '{"collection":{"items":[],"metadata":{"total_hits":0}}}'
           def load(path):
               try: return json.load(open(path))
-              except Exception as e: print(f"parse error {path}: {e}", file=sys.stderr); return {}
+              except Exception as e: print(f"parse error {path}: {e}", file=sys.stderr); return json.loads(EMPTY)
           def parse_sol(title):
               m = re.search(r'\bSol\s+(\d+)', title, re.I)
               return int(m.group(1)) if m else 0
-          def slim(data, rover_name):
+          def slim(data, rover_name, category='mars'):
               items = data.get('collection', {}).get('items', [])
               photos = []
               for item in items:
@@ -49,19 +51,26 @@ jobs:
                   camera = re.sub(r'^Sol\s+\d+[:\-\s]*', '', title, flags=re.I).strip() or title
                   photos.append({'img_src': img, 'sol': sol,
                                  'camera': {'full_name': camera},
-                                 'rover': {'name': rover_name}})
+                                 'rover': {'name': rover_name},
+                                 'category': category})
               total = data.get('collection', {}).get('metadata', {}).get('total_hits', 0)
               max_sol = max((p['sol'] for p in photos if p['sol']), default=0)
               return photos, total, max_sol
-          pp_raw = load('/tmp/pp.json')
-          cp_raw = load('/tmp/cp.json')
-          pp, p_total, p_max_sol = slim(pp_raw, 'Perseverance')
-          cp, c_total, c_max_sol = slim(cp_raw, 'Curiosity')
-          out = {'fetched_at': datetime.now(timezone.utc).isoformat(),
-                 'perseverance': {'manifest': {'max_sol': p_max_sol, 'total_photos': p_total}, 'latest_photos': pp[:30]},
-                 'curiosity':    {'manifest': {'max_sol': c_max_sol, 'total_photos': c_total}, 'latest_photos': cp[:30]}}
+          pp,  p_total,  p_max  = slim(load('/tmp/pp.json'),  'Perseverance')
+          cp,  c_total,  c_max  = slim(load('/tmp/cp.json'),  'Curiosity')
+          op,  o_total,  o_max  = slim(load('/tmp/op.json'),  'Opportunity')
+          sp,  s_total,  s_max  = slim(load('/tmp/sp.json'),  'Spirit')
+          dev, d_total,  _      = slim(load('/tmp/dev.json'), 'NASA', 'development')
+          out = {
+              'fetched_at': datetime.now(timezone.utc).isoformat(),
+              'perseverance': {'manifest': {'max_sol': p_max, 'total_photos': p_total}, 'latest_photos': pp[:30]},
+              'curiosity':    {'manifest': {'max_sol': c_max, 'total_photos': c_total}, 'latest_photos': cp[:30]},
+              'opportunity':  {'manifest': {'max_sol': o_max, 'total_photos': o_total}, 'latest_photos': op[:20]},
+              'spirit':       {'manifest': {'max_sol': s_max, 'total_photos': s_total}, 'latest_photos': sp[:20]},
+              'development':  dev[:30]
+          }
           json.dump(out, open('data/rovers.json', 'w'))
-          print(f"Saved - Percy: {len(pp)} photos (total_hits={p_total}), Curiosity: {len(cp)} photos (total_hits={c_total})")
+          print(f"Percy: {len(pp)}, Curiosity: {len(cp)}, Oppy: {len(op)}, Spirit: {len(sp)}, Dev: {len(dev)}")
           PYEOF
 
       - name: Commit updated data
