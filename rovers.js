@@ -1,3 +1,4 @@
+const NASA_KEY  = '__NASA_API_KEY__';
 const NASA_BASE = 'https://api.nasa.gov/mars-photos/api/v1';
 
 const MARS_SOL = 88775.244; // Earth seconds per Mars sol
@@ -194,19 +195,27 @@ function funDistance(km) {
 }
 
 // ============================================================
-// DATA - loaded from pre-fetched data/rovers.json (key never hits the browser)
+// DATA - fetched from NASA API (key injected at build time by CI)
 // ============================================================
 let roverData = null;
 
 async function loadRoverData() {
   if (roverData) return roverData;
+  if (NASA_KEY === '__NASA_API_KEY__') return null; // local dev without key
+
   try {
-    const r = await fetch('data/rovers.json');
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    roverData = await r.json();
+    const [percyRes, curioRes] = await Promise.all([
+      fetch(`${NASA_BASE}/rovers/perseverance/latest_photos?api_key=${NASA_KEY}`),
+      fetch(`${NASA_BASE}/rovers/curiosity/latest_photos?api_key=${NASA_KEY}`)
+    ]);
+    const [percyData, curioData] = await Promise.all([percyRes.json(), curioRes.json()]);
+    roverData = {
+      perseverance: { latest_photos: (percyData.latest_photos || []).slice(0, 20), manifest: true },
+      curiosity:    { latest_photos: (curioData.latest_photos || []).slice(0, 20), manifest: true }
+    };
     return roverData;
   } catch (e) {
-    console.warn('data/rovers.json unavailable:', e);
+    console.warn('NASA API unavailable:', e);
     return null;
   }
 }
@@ -266,7 +275,7 @@ function initMap() {
   marsMap = L.map('mars-map', {
     center: [0, 90], zoom: 2,
     attributionControl: false, zoomControl: true,
-    worldCopyJump: false, minZoom: 1, maxZoom: 10,
+    worldCopyJump: true, minZoom: 2, maxZoom: 10,
     maxBounds: [[-90, -180], [90, 180]],
     maxBoundsViscosity: 1.0
   });
@@ -336,74 +345,74 @@ async function fetchRoverPaths() {
 
 function replayJourney() {
   const keys = Object.keys(replayData);
-  if (!keys.length) { document.getElementById('replay-info').textContent = 'No path data loaded yet'; return; }
+  if (!keys.length) {
+    document.getElementById('replay-info').textContent = 'Path data not loaded yet - check map legend';
+    return;
+  }
 
   const btn = document.getElementById('replay-btn');
-  btn.disabled = true;
-  btn.textContent = '⏹ Stop';
+  const info = document.getElementById('replay-info');
+
+  // Mark that replay is running; clicking again stops it
   let stopped = false;
+  btn.textContent = '⏹ STOP';
   btn.onclick = () => { stopped = true; };
 
-  // Remove existing paths
+  // Remove existing drawn paths
   for (const [k, layer] of Object.entries(pathLayers)) {
     if (layer) marsMap.removeLayer(layer);
     pathLayers[k] = null;
   }
 
-  // Zoom map to fit all path data
+  // Zoom to fit all path data
   const allPts = keys.flatMap(k => replayData[k]);
   if (allPts.length) marsMap.fitBounds(L.latLngBounds(allPts), { padding: [40, 40], animate: true, duration: 1 });
 
+  // Create empty polylines that we'll grow frame by frame
   const tempLines = {};
   for (const k of keys) {
-    tempLines[k] = L.polyline([], {
-      color: ROVERS[k].color, weight: 4, opacity: 0.9
-    }).addTo(marsMap);
+    tempLines[k] = L.polyline([], { color: ROVERS[k].color, weight: 4, opacity: 0.9 }).addTo(marsMap);
   }
 
   const maxLen = Math.max(...keys.map(k => replayData[k].length));
-  // Draw 5 waypoints per frame so it completes in ~4 seconds
-  const STEP = Math.max(1, Math.ceil(maxLen / 200));
+  const STEP = Math.max(1, Math.ceil(maxLen / 200)); // ~200 frames total
   let i = 0;
-  const info = document.getElementById('replay-info');
+
+  function finish() {
+    btn.textContent = '▶ REPLAY JOURNEY';
+    btn.onclick = replayJourney;
+  }
 
   const tick = () => {
     if (stopped) {
-      // Restore full paths immediately
       for (const k of keys) {
         marsMap.removeLayer(tempLines[k]);
         pathLayers[k] = L.polyline(replayData[k], { color: ROVERS[k].color, weight: 2, opacity: 0.8 }).addTo(marsMap);
       }
-      btn.disabled = false;
-      btn.textContent = '▶ REPLAY JOURNEY';
-      btn.onclick = replayJourney;
-      info.textContent = 'Stopped';
+      info.textContent = '';
+      finish();
       return;
     }
 
-    for (let s = 0; s < STEP; s++) {
+    for (let s = 0; s < STEP && i < maxLen; s++, i++) {
       for (const k of keys) {
         const pts = replayData[k];
         if (i < pts.length) tempLines[k].addLatLng(pts[i]);
       }
-      i++;
     }
 
-    const pct = Math.min(100, Math.round((i / maxLen) * 100));
-    info.textContent = `Replaying... ${pct}%`;
+    info.textContent = `Replaying... ${Math.min(100, Math.round((i / maxLen) * 100))}%`;
 
     if (i < maxLen) {
       requestAnimationFrame(tick);
     } else {
-      btn.disabled = false;
-      btn.textContent = '▶ REPLAY JOURNEY';
-      btn.onclick = replayJourney;
-      info.textContent = 'Replay complete';
       for (const k of keys) pathLayers[k] = tempLines[k];
+      info.textContent = 'Replay complete';
+      finish();
     }
   };
 
-  // Short delay so fitBounds animation starts first
+  // Short delay so the fitBounds animation plays first
   setTimeout(() => requestAnimationFrame(tick), 1200);
 }
 
