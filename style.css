@@ -121,7 +121,7 @@ header h1 {
 }
 #perseverance-sol-header { color: var(--cyan); text-shadow: 0 0 12px rgba(0,212,255,0.5); }
 #curiosity-sol-header    { color: var(--gold); text-shadow: 0 0 12px rgba(255,176,48,0.45); }
-#earth-date-header       { color: rgba(208, 152, 122, 0.55); font-size: 0.62rem; }
+#earth-date-header       { color: rgba(220, 170, 140, 0.85); font-size: 0.62rem; }
 
 /* ---- NAV ---- */
 nav {

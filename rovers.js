@@ -218,10 +218,10 @@ async function loadRoverData() {
   if (roverData) return roverData;
   try {
     const [pp, cp, op, sp] = await Promise.all([
-      fetchRoverImages('Perseverance', 20),
-      fetchRoverImages('Curiosity',    20),
-      fetchRoverImages('Opportunity',  10),
-      fetchRoverImages('Spirit',       10)
+      fetchRoverImages('Perseverance', 50),
+      fetchRoverImages('Curiosity',    50),
+      fetchRoverImages('Opportunity',  30),
+      fetchRoverImages('Spirit',       20)
     ]);
     roverData = {
       perseverance: { latest_photos: pp, manifest: true },
@@ -273,14 +273,40 @@ function renderLatestPhotos(containerId, photos) {
     el.closest('.card-photo-strip').style.display = 'none';
     return;
   }
-  el.innerHTML = photos.map(p => `
-    <img src="${p.img_src}" alt="Mars photo" title="${p.camera.full_name}"
-         onclick="openLightbox('${p.img_full || p.img_src}','${p.camera.full_name.replace(/'/g,"\\'")}')">`).join('');
+  el.innerHTML = photos.map(p => {
+    const full = (p.img_full || p.img_src).replace(/"/g, '%22');
+    const title = p.camera.full_name.replace(/"/g, '&quot;');
+    return `<img src="${p.img_src}" alt="Mars photo" title="${title}" data-full="${full}" data-info="${title}" class="lb-trigger">`;
+  }).join('');
+  el.addEventListener('click', e => {
+    const img = e.target.closest('.lb-trigger');
+    if (img) openLightbox(img.dataset.full, img.dataset.info);
+  });
 }
 
 // ============================================================
 // MAP TAB
 // ============================================================
+
+// Simplified but directionally accurate traverse paths used when the live
+// MMGIS endpoints are blocked by CORS (which they usually are from a browser).
+const FALLBACK_PATHS = {
+  perseverance: [
+    [18.4446, 77.4509],[18.4451, 77.4498],[18.4460, 77.4482],[18.4470, 77.4468],
+    [18.4482, 77.4455],[18.4495, 77.4440],[18.4508, 77.4428],[18.4522, 77.4415],
+    [18.4538, 77.4402],[18.4553, 77.4388],[18.4568, 77.4372],[18.4583, 77.4358],
+    [18.4598, 77.4344],[18.4612, 77.4330],[18.4625, 77.4318],[18.4638, 77.4308],
+    [18.4650, 77.4298],[18.4660, 77.4290],[18.4670, 77.4285],[18.4678, 77.4280],
+  ],
+  curiosity: [
+    [-4.5895, 137.4417],[-4.5893, 137.4432],[-4.5890, 137.4450],[-4.5888, 137.4468],
+    [-4.5887, 137.4488],[-4.5888, 137.4510],[-4.5890, 137.4532],[-4.5893, 137.4555],
+    [-4.5897, 137.4578],[-4.5902, 137.4600],[-4.5908, 137.4622],[-4.5915, 137.4645],
+    [-4.5922, 137.4668],[-4.5930, 137.4690],[-4.5938, 137.4712],[-4.5946, 137.4732],
+    [-4.5954, 137.4750],[-4.5962, 137.4768],[-4.5970, 137.4785],[-4.5978, 137.4800],
+  ]
+};
+
 let marsMap, mapInited = false, pathLayers = {}, replayData = {};
 
 function initMap() {
@@ -328,34 +354,37 @@ function initMap() {
 
 async function fetchRoverPaths() {
   const statusEl = document.getElementById('path-status');
-  let loaded = 0;
+  let livePaths = 0;
 
   for (const [key, r] of Object.entries(ROVERS)) {
     if (!r.mmgisUrl) continue;
+    let coords = null;
     try {
       const resp = await fetch(r.mmgisUrl);
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       const geojson = await resp.json();
-      const features = geojson.features || [];
-      const coords = features
+      const pts = (geojson.features || [])
         .map(f => f.geometry?.coordinates)
         .filter(Boolean)
         .map(([lon, lat]) => [lat, lon]);
-
-      if (coords.length > 1) {
-        pathLayers[key] = L.polyline(coords, {
-          color: r.color, weight: 2, opacity: 0.8
-        }).addTo(marsMap);
-        replayData[key] = coords;
-        loaded++;
-      }
+      if (pts.length > 1) { coords = pts; livePaths++; }
     } catch (e) {
-      // CORS or network failure - path won't show but marker stays
+      // CORS or network failure - fall through to hardcoded fallback
+    }
+
+    // Use hardcoded fallback if live fetch failed
+    if (!coords && FALLBACK_PATHS[key]) coords = FALLBACK_PATHS[key];
+
+    if (coords) {
+      pathLayers[key] = L.polyline(coords, { color: r.color, weight: 2, opacity: 0.8 }).addTo(marsMap);
+      replayData[key] = coords;
     }
   }
 
-  statusEl.textContent = loaded > 0
-    ? `${loaded} rover path${loaded > 1 ? 's' : ''} loaded (${Object.values(replayData).reduce((a,c)=>a+c.length,0).toLocaleString()} waypoints)`
-    : 'Path data unavailable - showing landing sites';
+  const total = Object.values(replayData).reduce((a, c) => a + c.length, 0);
+  statusEl.textContent = livePaths > 0
+    ? `Live paths loaded (${total.toLocaleString()} waypoints)`
+    : `Showing approximate traverse paths (${total.toLocaleString()} waypoints)`;
 }
 
 function replayJourney() {
@@ -467,11 +496,11 @@ function filterPhotos(which) {
 function renderPhotoGrid() {
   const photos = currentFilter === 'all' ? allPhotos : allPhotos.filter(p => p.roverKey === currentFilter);
   document.getElementById('photo-count-label').textContent = `${photos.length} photos`;
-  document.getElementById('photo-grid').innerHTML = photos.map(p => {
-    const info = [p.rover.name, p.camera.full_name].filter(Boolean).join(' &bull; ');
-    const full = p.img_full || p.img_src;
-    return `
-    <div class="photo-card" onclick="openLightbox('${full}','${info}')">
+  const grid = document.getElementById('photo-grid');
+  grid.innerHTML = photos.map(p => {
+    const full = (p.img_full || p.img_src).replace(/"/g, '%22');
+    const info = `${p.rover.name} &bull; ${p.camera.full_name}`.replace(/"/g, '&quot;');
+    return `<div class="photo-card" data-full="${full}" data-info="${info}">
       <img src="${p.img_src}" alt="Mars photo" loading="lazy">
       <div class="photo-card-info">
         <div class="photo-rover">${p.rover.name.toUpperCase()}</div>
@@ -479,6 +508,10 @@ function renderPhotoGrid() {
       </div>
     </div>`;
   }).join('');
+  grid.onclick = e => {
+    const card = e.target.closest('.photo-card');
+    if (card) openLightbox(card.dataset.full, card.dataset.info);
+  };
 }
 
 function openLightbox(src, info) {
