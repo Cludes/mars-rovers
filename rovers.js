@@ -1,5 +1,4 @@
-const NASA_KEY  = '__NASA_API_KEY__';
-const NASA_BASE = 'https://api.nasa.gov/mars-photos/api/v1';
+const NASA_IMG = 'https://images-api.nasa.gov/search';
 
 const MARS_SOL = 88775.244; // Earth seconds per Mars sol
 
@@ -195,27 +194,44 @@ function funDistance(km) {
 }
 
 // ============================================================
-// DATA - fetched from NASA API (key injected at build time by CI)
+// DATA - NASA Image and Video Library (no API key required)
 // ============================================================
 let roverData = null;
 
+async function fetchRoverImages(roverName, count = 20) {
+  const q = encodeURIComponent(`${roverName} mars rover`);
+  const res = await fetch(`${NASA_IMG}?q=${q}&media_type=image&page_size=${count}`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const json = await res.json();
+  return (json.collection?.items || [])
+    .filter(item => item.links?.[0]?.href)
+    .map(item => ({
+      img_src:  item.links[0].href,
+      img_full: item.links[0].href.replace('~thumb.jpg', '~orig.jpg'),
+      camera:   { full_name: item.data?.[0]?.title || 'NASA Camera' },
+      sol:      '',
+      rover:    { name: roverName }
+    }));
+}
+
 async function loadRoverData() {
   if (roverData) return roverData;
-  if (NASA_KEY === '__NASA_API_KEY__') return null; // local dev without key
-
   try {
-    const [percyRes, curioRes] = await Promise.all([
-      fetch(`${NASA_BASE}/rovers/perseverance/latest_photos?api_key=${NASA_KEY}`),
-      fetch(`${NASA_BASE}/rovers/curiosity/latest_photos?api_key=${NASA_KEY}`)
+    const [pp, cp, op, sp] = await Promise.all([
+      fetchRoverImages('Perseverance', 20),
+      fetchRoverImages('Curiosity',    20),
+      fetchRoverImages('Opportunity',  10),
+      fetchRoverImages('Spirit',       10)
     ]);
-    const [percyData, curioData] = await Promise.all([percyRes.json(), curioRes.json()]);
     roverData = {
-      perseverance: { latest_photos: (percyData.latest_photos || []).slice(0, 20), manifest: true },
-      curiosity:    { latest_photos: (curioData.latest_photos || []).slice(0, 20), manifest: true }
+      perseverance: { latest_photos: pp, manifest: true },
+      curiosity:    { latest_photos: cp, manifest: true },
+      opportunity:  { latest_photos: op },
+      spirit:       { latest_photos: sp }
     };
     return roverData;
   } catch (e) {
-    console.warn('NASA API unavailable:', e);
+    console.warn('NASA Image Library unavailable:', e);
     return null;
   }
 }
@@ -258,9 +274,8 @@ function renderLatestPhotos(containerId, photos) {
     return;
   }
   el.innerHTML = photos.map(p => `
-    <img src="${p.img_src}" alt="Mars photo" title="${p.camera.full_name} - Sol ${p.sol}"
-         onclick="openLightbox('${p.img_src}','${p.camera.full_name} - Sol ${p.sol} - ${p.rover.name}')">
-  `).join('');
+    <img src="${p.img_src}" alt="Mars photo" title="${p.camera.full_name}"
+         onclick="openLightbox('${p.img_full || p.img_src}','${p.camera.full_name.replace(/'/g,"\\'")}')">`).join('');
 }
 
 // ============================================================
@@ -452,16 +467,18 @@ function filterPhotos(which) {
 function renderPhotoGrid() {
   const photos = currentFilter === 'all' ? allPhotos : allPhotos.filter(p => p.roverKey === currentFilter);
   document.getElementById('photo-count-label').textContent = `${photos.length} photos`;
-  document.getElementById('photo-grid').innerHTML = photos.map(p => `
-    <div class="photo-card" onclick="openLightbox('${p.img_src}','${p.camera.full_name} &bull; Sol ${p.sol} &bull; ${p.rover.name}')">
+  document.getElementById('photo-grid').innerHTML = photos.map(p => {
+    const info = [p.rover.name, p.camera.full_name].filter(Boolean).join(' &bull; ');
+    const full = p.img_full || p.img_src;
+    return `
+    <div class="photo-card" onclick="openLightbox('${full}','${info}')">
       <img src="${p.img_src}" alt="Mars photo" loading="lazy">
       <div class="photo-card-info">
         <div class="photo-rover">${p.rover.name.toUpperCase()}</div>
         <div class="photo-camera">${p.camera.full_name}</div>
-        <div class="photo-sol">${p.sol ? 'Sol ' + p.sol : ''}</div>
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
 function openLightbox(src, info) {
