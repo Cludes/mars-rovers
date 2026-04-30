@@ -186,16 +186,18 @@ function funDistance(km) {
 async function fetchManifest(roverName) {
   try {
     const r = await fetch(`${NASA_BASE}/manifests/${roverName}?api_key=${NASA_KEY}`);
+    if (!r.ok) { console.warn(`Manifest ${roverName}: HTTP ${r.status}`); return null; }
     return (await r.json()).photo_manifest;
-  } catch { return null; }
+  } catch (e) { console.warn(`Manifest ${roverName}: ${e}`); return null; }
 }
 
 async function fetchLatestPhotos(roverName, count = 8) {
   try {
     const r = await fetch(`${NASA_BASE}/rovers/${roverName}/latest_photos?api_key=${NASA_KEY}`);
+    if (!r.ok) { console.warn(`Photos ${roverName}: HTTP ${r.status}`); return []; }
     const d = await r.json();
     return (d.latest_photos || []).slice(0, count);
-  } catch { return []; }
+  } catch (e) { console.warn(`Photos ${roverName}: ${e}`); return []; }
 }
 
 // ============================================================
@@ -206,20 +208,27 @@ async function initStatus() {
   setInterval(updateSolCounters, 30000);
 
   // Manifests for distance + photo count
+  // Note: NASA manifest API does not include total_distance_km - we estimate from sol count
   const [pm, cm] = await Promise.all([
     fetchManifest('perseverance'),
     fetchManifest('curiosity')
   ]);
 
+  const apiOk = pm || cm;
+  document.getElementById('api-status').style.display = apiOk ? 'none' : 'flex';
+
   if (pm) {
-    const dist = (pm.total_distance_km || pm.max_sol * 0.025).toFixed(1); // fallback estimate
-    document.getElementById('percy-dist').textContent = `${parseFloat(pm.total_distance_km || 0).toFixed(1) || '~' + (pm.max_sol * 0.025).toFixed(0)} km`;
-    document.getElementById('percy-dist-fun').textContent = funDistance(parseFloat(pm.total_distance_km));
+    // ~28 km driven over 1845 sols ≈ 0.0152 km/sol
+    const percyEst = (pm.max_sol * 0.0152).toFixed(1);
+    document.getElementById('percy-dist').textContent = `~${percyEst} km`;
+    document.getElementById('percy-dist-fun').textContent = funDistance(parseFloat(percyEst));
     document.getElementById('percy-photos').textContent = pm.total_photos.toLocaleString();
   }
   if (cm) {
-    document.getElementById('curiosity-dist').textContent = `${parseFloat(cm.total_distance_km || 0).toFixed(1) || '~33'} km`;
-    document.getElementById('curiosity-dist-fun').textContent = funDistance(parseFloat(cm.total_distance_km || 33));
+    // ~33 km driven over 4880 sols ≈ 0.00677 km/sol
+    const curioEst = (cm.max_sol * 0.00677).toFixed(1);
+    document.getElementById('curiosity-dist').textContent = `~${curioEst} km`;
+    document.getElementById('curiosity-dist-fun').textContent = funDistance(parseFloat(curioEst));
     document.getElementById('curiosity-photos').textContent = cm.total_photos.toLocaleString();
   }
 
