@@ -16,39 +16,52 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Fetch and save rover data
-        env:
-          NASA_API_KEY: ${{ secrets.NASA_API_KEY }}
         run: |
-          BASE="https://api.nasa.gov/mars-photos/api/v1"
-          curl -s -w "\nHTTP %{http_code} %{url_effective}\n" -o /tmp/pm.json "$BASE/manifests/perseverance?api_key=$NASA_API_KEY"
-          curl -s -w "\nHTTP %{http_code} %{url_effective}\n" -o /tmp/cm.json "$BASE/manifests/curiosity?api_key=$NASA_API_KEY"
-          curl -s -w "\nHTTP %{http_code} %{url_effective}\n" -o /tmp/pp.json "$BASE/rovers/perseverance/latest_photos?api_key=$NASA_API_KEY"
-          curl -s -w "\nHTTP %{http_code} %{url_effective}\n" -o /tmp/cp.json "$BASE/rovers/curiosity/latest_photos?api_key=$NASA_API_KEY"
+          BASE="https://images-api.nasa.gov"
+          curl -s -w "\nHTTP %{http_code} %{url_effective}\n" -o /tmp/pp.json "$BASE/search?q=perseverance+mars+sol&media_type=image&page_size=30&year_start=2024"
+          curl -s -w "\nHTTP %{http_code} %{url_effective}\n" -o /tmp/cp.json "$BASE/search?q=curiosity+mars+sol&media_type=image&page_size=30&year_start=2024"
           echo "--- file sizes ---"
-          wc -c /tmp/pm.json /tmp/cm.json /tmp/pp.json /tmp/cp.json
-          [ -s /tmp/pm.json ] || echo '{}' > /tmp/pm.json
-          [ -s /tmp/cm.json ] || echo '{}' > /tmp/cm.json
-          [ -s /tmp/pp.json ] || echo '{}' > /tmp/pp.json
-          [ -s /tmp/cp.json ] || echo '{}' > /tmp/cp.json
+          wc -c /tmp/pp.json /tmp/cp.json
+          [ -s /tmp/pp.json ] || echo '{"collection":{"items":[],"metadata":{"total_hits":0}}}' > /tmp/pp.json
+          [ -s /tmp/cp.json ] || echo '{"collection":{"items":[],"metadata":{"total_hits":0}}}' > /tmp/cp.json
           python3 - <<'PYEOF'
-          import json, sys
+          import json, sys, re
           from datetime import datetime, timezone
           def load(path):
               try: return json.load(open(path))
               except Exception as e: print(f"parse error {path}: {e}", file=sys.stderr); return {}
-          pm = load('/tmp/pm.json').get('photo_manifest', {})
-          cm = load('/tmp/cm.json').get('photo_manifest', {})
-          pp = load('/tmp/pp.json').get('latest_photos', [])[:30]
-          cp = load('/tmp/cp.json').get('latest_photos', [])[:30]
-          def slim(photos):
-              return [{'img_src':p['img_src'],'sol':p['sol'],
-                       'camera':{'full_name':p['camera']['full_name']},
-                       'rover':{'name':p['rover']['name']}} for p in photos]
-          out = {'fetched_at':datetime.now(timezone.utc).isoformat(),
-                 'perseverance':{'manifest':pm,'latest_photos':slim(pp)},
-                 'curiosity':   {'manifest':cm,'latest_photos':slim(cp)}}
-          json.dump(out, open('data/rovers.json','w'))
-          print(f"Saved - Percy: {len(pp)} photos, Curiosity: {len(cp)} photos")
+          def parse_sol(title):
+              m = re.search(r'\bSol\s+(\d+)', title, re.I)
+              return int(m.group(1)) if m else 0
+          def slim(data, rover_name):
+              items = data.get('collection', {}).get('items', [])
+              photos = []
+              for item in items:
+                  d = item.get('data', [{}])[0]
+                  links = item.get('links', [])
+                  img = next((l['href'] for l in links if l.get('rel') == 'alternate' and 'medium' in l.get('href', '')), None)
+                  if not img:
+                      img = next((l['href'] for l in links if l.get('rel') in ('preview', 'alternate')), None)
+                  if not img:
+                      continue
+                  title = d.get('title', '')
+                  sol = parse_sol(title)
+                  camera = re.sub(r'^Sol\s+\d+[:\-\s]*', '', title, flags=re.I).strip() or title
+                  photos.append({'img_src': img, 'sol': sol,
+                                 'camera': {'full_name': camera},
+                                 'rover': {'name': rover_name}})
+              total = data.get('collection', {}).get('metadata', {}).get('total_hits', 0)
+              max_sol = max((p['sol'] for p in photos if p['sol']), default=0)
+              return photos, total, max_sol
+          pp_raw = load('/tmp/pp.json')
+          cp_raw = load('/tmp/cp.json')
+          pp, p_total, p_max_sol = slim(pp_raw, 'Perseverance')
+          cp, c_total, c_max_sol = slim(cp_raw, 'Curiosity')
+          out = {'fetched_at': datetime.now(timezone.utc).isoformat(),
+                 'perseverance': {'manifest': {'max_sol': p_max_sol, 'total_photos': p_total}, 'latest_photos': pp[:30]},
+                 'curiosity':    {'manifest': {'max_sol': c_max_sol, 'total_photos': c_total}, 'latest_photos': cp[:30]}}
+          json.dump(out, open('data/rovers.json', 'w'))
+          print(f"Saved - Percy: {len(pp)} photos (total_hits={p_total}), Curiosity: {len(cp)} photos (total_hits={c_total})")
           PYEOF
 
       - name: Commit updated data
