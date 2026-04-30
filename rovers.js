@@ -208,21 +208,18 @@ async function initStatus() {
   const apiOk = data && (data.perseverance?.manifest || data.curiosity?.manifest);
   document.getElementById('api-status').style.display = apiOk ? 'none' : 'flex';
 
-  const pm = data?.perseverance?.manifest;
-  const cm = data?.curiosity?.manifest;
-
-  if (pm) {
-    const percyEst = (pm.max_sol * 0.0152).toFixed(1);
-    document.getElementById('percy-dist').textContent = `~${percyEst} km`;
-    document.getElementById('percy-dist-fun').textContent = funDistance(parseFloat(percyEst));
-    document.getElementById('percy-photos').textContent = pm.total_photos.toLocaleString();
-  }
-  if (cm) {
-    const curioEst = (cm.max_sol * 0.00677).toFixed(1);
-    document.getElementById('curiosity-dist').textContent = `~${curioEst} km`;
-    document.getElementById('curiosity-dist-fun').textContent = funDistance(parseFloat(curioEst));
-    document.getElementById('curiosity-photos').textContent = cm.total_photos.toLocaleString();
-  }
+  // Use live sol (computed from landing date) for accurate distance estimates
+  const percySol = sol(ROVERS.perseverance.landed);
+  const curioSol = sol(ROVERS.curiosity.landed);
+  // Perseverance: ~35 km over ~1800 sols; Curiosity: ~32 km over ~4300 sols
+  const percyEst = (percySol * 0.0194).toFixed(1);
+  const curioEst = (curioSol * 0.00744).toFixed(1);
+  document.getElementById('percy-dist').textContent = `~${percyEst} km`;
+  document.getElementById('percy-dist-fun').textContent = funDistance(parseFloat(percyEst));
+  document.getElementById('curiosity-dist').textContent = `~${curioEst} km`;
+  document.getElementById('curiosity-dist-fun').textContent = funDistance(parseFloat(curioEst));
+  document.getElementById('percy-photos').textContent = '700,000+';
+  document.getElementById('curiosity-photos').textContent = '1,000,000+';
 
   const pp = data?.perseverance?.latest_photos?.slice(0, 6) || [];
   const cp = data?.curiosity?.latest_photos?.slice(0, 6) || [];
@@ -266,8 +263,16 @@ function initMap() {
   }).addTo(marsMap);
   tiles.on('tileerror', e => { e.tile.style.visibility = 'hidden'; });
 
-  // Leaflet needs the container to have a rendered size before it can calculate layout
-  setTimeout(() => marsMap.invalidateSize(), 300);
+  // ResizeObserver fires invalidateSize as soon as the container has real dimensions
+  const mapEl = document.getElementById('mars-map');
+  const ro = new ResizeObserver(() => {
+    if (mapEl.offsetWidth > 0 && mapEl.offsetHeight > 0) {
+      marsMap.invalidateSize();
+      ro.disconnect();
+    }
+  });
+  ro.observe(mapEl);
+  setTimeout(() => marsMap.invalidateSize(), 400);
 
   // Place all rover markers
   for (const [key, r] of Object.entries(ROVERS)) {
@@ -375,18 +380,16 @@ async function initPhotos() {
   document.getElementById('photo-grid').innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--dim);padding:3rem">Loading photos from Mars...</div>';
 
   const data = await loadRoverData();
-  const pp  = data?.perseverance?.latest_photos || [];
-  const cp  = data?.curiosity?.latest_photos    || [];
-  const op  = data?.opportunity?.latest_photos  || [];
-  const sp  = data?.spirit?.latest_photos       || [];
-  const dev = data?.development                 || [];
+  const pp = data?.perseverance?.latest_photos || [];
+  const cp = data?.curiosity?.latest_photos    || [];
+  const op = data?.opportunity?.latest_photos  || [];
+  const sp = data?.spirit?.latest_photos       || [];
 
   allPhotos = [
     ...pp.map(p => ({ ...p, roverKey: 'perseverance' })),
     ...cp.map(p => ({ ...p, roverKey: 'curiosity' })),
     ...op.map(p => ({ ...p, roverKey: 'opportunity' })),
-    ...sp.map(p => ({ ...p, roverKey: 'spirit' })),
-    ...dev.map(p => ({ ...p, roverKey: 'development' }))
+    ...sp.map(p => ({ ...p, roverKey: 'spirit' }))
   ];
 
   renderPhotoGrid();
@@ -408,7 +411,7 @@ function renderPhotoGrid() {
       <div class="photo-card-info">
         <div class="photo-rover">${p.rover.name.toUpperCase()}</div>
         <div class="photo-camera">${p.camera.full_name}</div>
-        <div class="photo-sol">${p.sol ? 'Sol ' + p.sol : 'Development'}</div>
+        <div class="photo-sol">${p.sol ? 'Sol ' + p.sol : ''}</div>
       </div>
     </div>
   `).join('');

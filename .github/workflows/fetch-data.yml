@@ -22,9 +22,8 @@ jobs:
           curl -s -o /tmp/cp.json  "$BASE/search?q=curiosity+mars+sol&media_type=image&page_size=30&year_start=2022"
           curl -s -o /tmp/op.json  "$BASE/search?q=opportunity+rover+mars&media_type=image&page_size=20"
           curl -s -o /tmp/sp.json  "$BASE/search?q=spirit+rover+mars&media_type=image&page_size=20"
-          curl -s -o /tmp/dev.json "$BASE/search?q=mars+rover+build+assembly+laboratory&media_type=image&page_size=30"
           echo "--- file sizes ---"
-          wc -c /tmp/pp.json /tmp/cp.json /tmp/op.json /tmp/sp.json /tmp/dev.json
+          wc -c /tmp/pp.json /tmp/cp.json /tmp/op.json /tmp/sp.json
           python3 - <<'PYEOF'
           import json, sys, re
           from datetime import datetime, timezone
@@ -60,17 +59,15 @@ jobs:
           cp,  c_total,  c_max  = slim(load('/tmp/cp.json'),  'Curiosity')
           op,  o_total,  o_max  = slim(load('/tmp/op.json'),  'Opportunity')
           sp,  s_total,  s_max  = slim(load('/tmp/sp.json'),  'Spirit')
-          dev, d_total,  _      = slim(load('/tmp/dev.json'), 'NASA', 'development')
           out = {
               'fetched_at': datetime.now(timezone.utc).isoformat(),
               'perseverance': {'manifest': {'max_sol': p_max, 'total_photos': p_total}, 'latest_photos': pp[:30]},
               'curiosity':    {'manifest': {'max_sol': c_max, 'total_photos': c_total}, 'latest_photos': cp[:30]},
               'opportunity':  {'manifest': {'max_sol': o_max, 'total_photos': o_total}, 'latest_photos': op[:20]},
               'spirit':       {'manifest': {'max_sol': s_max, 'total_photos': s_total}, 'latest_photos': sp[:20]},
-              'development':  dev[:30]
           }
           json.dump(out, open('data/rovers.json', 'w'))
-          print(f"Percy: {len(pp)}, Curiosity: {len(cp)}, Oppy: {len(op)}, Spirit: {len(sp)}, Dev: {len(dev)}")
+          print(f"Percy: {len(pp)}, Curiosity: {len(cp)}, Oppy: {len(op)}, Spirit: {len(sp)}")
           PYEOF
 
       - name: Commit updated data
