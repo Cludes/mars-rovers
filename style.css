@@ -21,16 +21,20 @@
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
-html, body { height: 100%; }
+html { height: 100%; }
 
 body {
   background: var(--bg);
   color: var(--text);
   font-family: 'Inter', sans-serif;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  grid-template-areas: 'header' 'nav' 'content';
+  height: 100vh;
   overflow: hidden;
 }
+header { grid-area: header; }
+nav    { grid-area: nav; }
 
 /* ---- PARTICLES ---- */
 #particles { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
@@ -141,19 +145,19 @@ nav button.active {
 .oppy-btn.active { color: var(--gold) !important; border-bottom-color: var(--gold) !important; }
 
 /* ---- TABS ---- */
-.tab { display: none; }
-.tab.active { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow-y: auto; position: relative; z-index: 1; }
+.tab { display: none; grid-area: content; }
+.tab.active { display: flex; flex-direction: column; overflow-y: auto; position: relative; z-index: 1; }
 #tab-map.active { overflow: hidden; }
 
 /* ---- MAP TAB ---- */
 #map-wrap {
   display: flex;
   flex-direction: row;
-  flex: 1;
-  min-height: 0;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
 }
-#mars-map { flex: 1; min-height: 0; }
+#mars-map { flex: 1; height: 100%; }
 #status-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
