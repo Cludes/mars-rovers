@@ -273,7 +273,7 @@ function initMap() {
 
   // MOLA colour elevation tiles - beautiful & reliable
   const tiles = L.tileLayer('https://s3-eu-west-1.amazonaws.com/whereonmars.cartodb.net/mola-color/{z}/{x}/{y}.png', {
-    maxZoom: 10, tms: false, noWrap: true,
+    maxZoom: 10, tms: true, noWrap: true,
     bounds: [[-90, -180], [90, 180]]
   }).addTo(marsMap);
   tiles.on('tileerror', e => { e.tile.style.visibility = 'hidden'; });
