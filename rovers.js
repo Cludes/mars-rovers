@@ -1,5 +1,6 @@
-// Replaced by CI: sed replaces this whole line with the real key
-const NASA_KEY = 'DEMO_KEY';
+// NASA_KEY is injected by CI into nasa-key.js (loaded before this script)
+// Falls back to DEMO_KEY if nasa-key.js isn't present (local dev)
+if (typeof NASA_KEY === 'undefined') var NASA_KEY = 'DEMO_KEY';
 const NASA_BASE = 'https://api.nasa.gov/mars-photos/api/v1';
 
 const MARS_SOL = 88775.244; // Earth seconds per Mars sol
