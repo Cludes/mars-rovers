@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&display=swap');
 
 :root {
   --bg:       #0a0305;
@@ -26,7 +26,7 @@ html { height: 100%; }
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'Inter', sans-serif;
+  font-family: 'Outfit', sans-serif;
   display: grid;
   grid-template-rows: auto auto 1fr;
   grid-template-areas: 'header' 'nav' 'content';
@@ -93,8 +93,8 @@ header h1 {
 }
 
 #dedication {
-  font-family: 'Inter', sans-serif;
-  font-size: 0.68rem;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.75rem;
   letter-spacing: 0.2rem;
   color: rgba(196,144,112,0.55);
   font-style: italic;
@@ -129,9 +129,9 @@ nav button {
   border-bottom: 2px solid transparent;
   color: var(--dim);
   font-family: 'Space Mono', monospace;
-  font-size: 0.65rem;
-  letter-spacing: 0.2rem;
-  padding: 0.85rem 2rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.18rem;
+  padding: 0.9rem 1.8rem;
   cursor: pointer;
   transition: color 0.2s, border-color 0.2s;
 }
@@ -146,7 +146,7 @@ nav button.active {
 
 /* ---- TABS ---- */
 .tab { display: none; grid-area: content; }
-.tab.active { display: flex; flex-direction: column; overflow-y: auto; position: relative; z-index: 1; }
+.tab.active { display: flex; flex-direction: column; height: 100%; overflow-y: auto; position: relative; z-index: 1; }
 #tab-map.active { overflow: hidden; }
 
 /* ---- MAP TAB ---- */
@@ -161,8 +161,8 @@ nav button.active {
 #status-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.4rem;
-  padding: 1.4rem;
+  gap: 1.6rem;
+  padding: 1.6rem;
   flex: 1; min-height: 0; overflow-y: auto;
 }
 
@@ -237,14 +237,14 @@ nav button.active {
 }
 .cstat-value {
   font-family: 'Space Mono', monospace;
-  font-size: 1.2rem;
+  font-size: 1.35rem;
   font-weight: 700;
   color: #fff;
   line-height: 1;
 }
 .cstat-value.cyan { color: var(--cyan); text-shadow: var(--glow-c); }
 .cstat-value.gold { color: var(--gold); text-shadow: 0 0 12px rgba(255,176,48,0.5); }
-.cstat-value.small { font-size: 0.8rem; }
+.cstat-value.small { font-size: 0.92rem; }
 .cstat-sub { font-size: 0.54rem; color: var(--text2); margin-top: 0.2rem; line-height: 1.4; }
 
 .card-photo-strip {
@@ -472,16 +472,16 @@ nav button.active {
 
 /* ---- ROVERS TAB ---- */
 #rovers-intro {
-  text-align: center; font-size: 0.8rem;
-  color: var(--text2); letter-spacing: 0.08rem;
-  padding: 1.2rem; border-bottom: 1px solid var(--border); flex-shrink: 0;
+  text-align: center; font-size: 0.95rem;
+  color: var(--text2); letter-spacing: 0.06rem;
+  padding: 1.3rem; border-bottom: 1px solid var(--border); flex-shrink: 0;
 }
 
 #rover-cards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
-  gap: 1.2rem;
-  padding: 1.4rem;
+  gap: 1.5rem;
+  padding: 1.6rem;
   overflow-y: auto; flex: 1; align-content: start;
 }
 
@@ -491,20 +491,20 @@ nav button.active {
   border-radius: 8px; overflow: hidden;
 }
 .rover-card-top { height: 3px; }
-.rover-card-body { padding: 1.1rem 1.3rem; }
+.rover-card-body { padding: 1.3rem 1.5rem; }
 
 .rc-title-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.4rem; }
-.rc-name { font-family: 'Space Mono', monospace; font-size: 1rem; font-weight: 700; letter-spacing: 0.15rem; color: #fff; }
-.rc-dates { font-size: 0.6rem; color: var(--dim); font-family: 'Space Mono', monospace; margin-bottom: 0.7rem; }
+.rc-name { font-family: 'Space Mono', monospace; font-size: 1.15rem; font-weight: 700; letter-spacing: 0.15rem; color: #fff; }
+.rc-dates { font-size: 0.72rem; color: var(--dim); font-family: 'Space Mono', monospace; margin-bottom: 0.8rem; }
 .rc-desc {
-  font-size: 0.68rem; color: var(--text2); line-height: 1.75;
-  margin-bottom: 0.9rem;
-  border-left: 2px solid var(--rust); padding-left: 0.8rem;
+  font-size: 0.88rem; color: var(--text2); line-height: 1.8;
+  margin-bottom: 1rem;
+  border-left: 2px solid var(--rust); padding-left: 0.9rem;
 }
-.rc-facts-title { font-family: 'Space Mono', monospace; font-size: 0.5rem; letter-spacing: 0.2rem; color: var(--dim); margin-bottom: 0.45rem; }
+.rc-facts-title { font-family: 'Space Mono', monospace; font-size: 0.55rem; letter-spacing: 0.2rem; color: var(--dim); margin-bottom: 0.5rem; }
 .rc-fact {
-  font-size: 0.65rem; color: var(--text2);
-  padding: 0.28rem 0; border-bottom: 1px solid rgba(180,70,15,0.1);
+  font-size: 0.82rem; color: var(--text2);
+  padding: 0.35rem 0; border-bottom: 1px solid rgba(180,70,15,0.1);
   display: flex; align-items: flex-start; gap: 0.5rem; line-height: 1.5;
 }
 .rc-fact::before { content: '>'; color: var(--orange); flex-shrink: 0; }
@@ -514,8 +514,8 @@ nav button.active {
   margin-top: 0.9rem; padding-top: 0.7rem;
   border-top: 1px solid var(--border); flex-wrap: wrap;
 }
-.rc-stat-val { font-family: 'Space Mono', monospace; font-size: 0.9rem; color: var(--orange); font-weight: 700; }
-.rc-stat-lbl { font-size: 0.56rem; color: var(--dim); margin-top: 0.1rem; }
+.rc-stat-val { font-family: 'Space Mono', monospace; font-size: 1rem; color: var(--orange); font-weight: 700; }
+.rc-stat-lbl { font-size: 0.65rem; color: var(--dim); margin-top: 0.1rem; }
 
 /* ---- SHARED BUTTON ---- */
 button {
@@ -545,7 +545,7 @@ button:disabled { opacity: 0.5; cursor: default; }
   background: rgba(28,13,8,0.98) !important;
   border: 1px solid var(--border) !important;
   color: var(--text) !important;
-  font-family: 'Inter', sans-serif !important;
+  font-family: 'Outfit', sans-serif !important;
   border-radius: 6px !important;
   box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
 }

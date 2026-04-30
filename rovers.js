@@ -104,18 +104,25 @@ const ROVERS = {
 // TAB SWITCHING
 // ============================================================
 function showTab(name) {
+  // Destroy Leaflet when navigating away so it always reinits with correct dimensions
+  if (marsMap && name !== 'map') {
+    marsMap.remove();
+    marsMap = null;
+    mapInited = false;
+  }
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   document.getElementById('btn-' + name).classList.add('active');
   if (name === 'map') {
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      initMap();
-      if (marsMap) {
-        marsMap.invalidateSize({ reset: true });
-        marsMap.setView([0, 90], 2, { animate: false });
-      }
-    }));
+    // Poll until the container has a real height before initializing Leaflet
+    let attempts = 0;
+    const tryInit = () => {
+      const el = document.getElementById('mars-map');
+      if (el.offsetHeight > 0 || attempts++ > 20) { initMap(); }
+      else { requestAnimationFrame(tryInit); }
+    };
+    requestAnimationFrame(tryInit);
   }
   if (name === 'photos') initPhotos();
   if (name === 'rovers') renderRoverCards();
@@ -253,11 +260,7 @@ function renderLatestPhotos(containerId, photos) {
 let marsMap, mapInited = false, pathLayers = {}, replayData = {};
 
 function initMap() {
-  if (mapInited) {
-    marsMap.invalidateSize({ reset: true });
-    marsMap.setView([0, 90], 2, { animate: false });
-    return;
-  }
+  if (mapInited) return;
   mapInited = true;
 
   marsMap = L.map('mars-map', {
