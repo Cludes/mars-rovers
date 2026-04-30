@@ -20,10 +20,16 @@ jobs:
           NASA_API_KEY: ${{ secrets.NASA_API_KEY }}
         run: |
           BASE="https://api.nasa.gov/mars-photos/api/v1"
-          curl -s "$BASE/manifests/perseverance?api_key=$NASA_API_KEY" > /tmp/pm.json || echo '{}' > /tmp/pm.json
-          curl -s "$BASE/manifests/curiosity?api_key=$NASA_API_KEY"    > /tmp/cm.json || echo '{}' > /tmp/cm.json
-          curl -s "$BASE/rovers/perseverance/latest_photos?api_key=$NASA_API_KEY" > /tmp/pp.json || echo '{}' > /tmp/pp.json
-          curl -s "$BASE/rovers/curiosity/latest_photos?api_key=$NASA_API_KEY"    > /tmp/cp.json || echo '{}' > /tmp/cp.json
+          curl -s -w "\nHTTP %{http_code} %{url_effective}\n" -o /tmp/pm.json "$BASE/manifests/perseverance?api_key=$NASA_API_KEY"
+          curl -s -w "\nHTTP %{http_code} %{url_effective}\n" -o /tmp/cm.json "$BASE/manifests/curiosity?api_key=$NASA_API_KEY"
+          curl -s -w "\nHTTP %{http_code} %{url_effective}\n" -o /tmp/pp.json "$BASE/rovers/perseverance/latest_photos?api_key=$NASA_API_KEY"
+          curl -s -w "\nHTTP %{http_code} %{url_effective}\n" -o /tmp/cp.json "$BASE/rovers/curiosity/latest_photos?api_key=$NASA_API_KEY"
+          echo "--- file sizes ---"
+          wc -c /tmp/pm.json /tmp/cm.json /tmp/pp.json /tmp/cp.json
+          [ -s /tmp/pm.json ] || echo '{}' > /tmp/pm.json
+          [ -s /tmp/cm.json ] || echo '{}' > /tmp/cm.json
+          [ -s /tmp/pp.json ] || echo '{}' > /tmp/pp.json
+          [ -s /tmp/cp.json ] || echo '{}' > /tmp/cp.json
           python3 - <<'PYEOF'
           import json, sys
           from datetime import datetime, timezone
