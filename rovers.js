@@ -108,7 +108,7 @@ function showTab(name) {
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   document.getElementById('btn-' + name).classList.add('active');
-  if (name === 'map') { initMap(); setTimeout(() => marsMap && marsMap.invalidateSize(), 300); }
+  if (name === 'map') { initMap(); }
   if (name === 'photos') initPhotos();
   if (name === 'rovers') renderRoverCards();
   if (name === 'oppy') animateOppyNumbers();
@@ -246,6 +246,15 @@ let marsMap, mapInited = false, pathLayers = {}, replayData = {};
 
 function initMap() {
   if (mapInited) return;
+
+  // Don't create the Leaflet map until the container has a real height.
+  // If the tab just became visible, the browser may not have laid it out yet.
+  const mapEl = document.getElementById('mars-map');
+  if (mapEl.offsetHeight === 0) {
+    requestAnimationFrame(initMap);
+    return;
+  }
+
   mapInited = true;
 
   marsMap = L.map('mars-map', {
@@ -262,17 +271,6 @@ function initMap() {
     bounds: [[-90, -180], [90, 180]]
   }).addTo(marsMap);
   tiles.on('tileerror', e => { e.tile.style.visibility = 'hidden'; });
-
-  // ResizeObserver fires invalidateSize as soon as the container has real dimensions
-  const mapEl = document.getElementById('mars-map');
-  const ro = new ResizeObserver(() => {
-    if (mapEl.offsetWidth > 0 && mapEl.offsetHeight > 0) {
-      marsMap.invalidateSize();
-      ro.disconnect();
-    }
-  });
-  ro.observe(mapEl);
-  setTimeout(() => marsMap.invalidateSize(), 400);
 
   // Place all rover markers
   for (const [key, r] of Object.entries(ROVERS)) {
