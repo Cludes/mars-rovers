@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mars Rover Mission Control</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div id="particles"></div>
+
+  <header>
+    <div id="horizon"></div>
+    <div id="header-inner">
+      <div id="mission-label">NASA MARS ROVER MISSION CONTROL</div>
+      <h1>MARS ROVERS</h1>
+      <div id="header-stats">
+        <span id="perseverance-sol-header"></span>
+        <span class="header-sep">|</span>
+        <span id="curiosity-sol-header"></span>
+        <span class="header-sep">|</span>
+        <span id="earth-date-header"></span>
+      </div>
+    </div>
+  </header>
+
+  <nav>
+    <button id="btn-status"  class="active" onclick="showTab('status')">MISSION STATUS</button>
+    <button id="btn-map"     onclick="showTab('map')">MARS MAP</button>
+    <button id="btn-photos"  onclick="showTab('photos')">PHOTO FEED</button>
+    <button id="btn-rovers"  onclick="showTab('rovers')">THE ROVERS</button>
+  </nav>
+
+  <!-- ===== MISSION STATUS TAB ===== -->
+  <section id="tab-status" class="tab active">
+    <div id="status-grid">
+
+      <div class="rover-status-card" id="card-perseverance">
+        <div class="card-top-bar" style="background:var(--cyan)"></div>
+        <div class="card-header">
+          <div>
+            <div class="rover-card-name">PERSEVERANCE</div>
+            <div class="rover-card-sub">Jezero Crater &bull; Mars 2020</div>
+          </div>
+          <div class="status-badge active-badge">&#9679; ACTIVE</div>
+        </div>
+        <div class="card-stats">
+          <div class="cstat">
+            <div class="cstat-label">SOL</div>
+            <div class="cstat-value cyan" id="percy-sol">--</div>
+            <div class="cstat-sub">Mars days since landing</div>
+          </div>
+          <div class="cstat">
+            <div class="cstat-label">DISTANCE DRIVEN</div>
+            <div class="cstat-value" id="percy-dist">--</div>
+            <div class="cstat-sub" id="percy-dist-fun"></div>
+          </div>
+          <div class="cstat">
+            <div class="cstat-label">TOTAL PHOTOS</div>
+            <div class="cstat-value cyan" id="percy-photos">--</div>
+          </div>
+          <div class="cstat">
+            <div class="cstat-label">LOCATION</div>
+            <div class="cstat-value small">Jezero Crater</div>
+            <div class="cstat-sub">Ancient lakebed</div>
+          </div>
+        </div>
+        <div class="card-photo-strip">
+          <div class="cstat-label" style="margin-bottom:0.6rem">LATEST PHOTO FROM MARS</div>
+          <div id="percy-latest-photo" class="latest-photo-wrap">Loading...</div>
+        </div>
+        <div class="card-friend">
+          <div class="friend-icon">&#x1F681;</div>
+          <div>
+            <div class="friend-name">Ingenuity Helicopter</div>
+            <div class="friend-sub">World's first extraterrestrial aircraft &bull; 72+ flights completed</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rover-status-card" id="card-curiosity">
+        <div class="card-top-bar" style="background:var(--gold)"></div>
+        <div class="card-header">
+          <div>
+            <div class="rover-card-name">CURIOSITY</div>
+            <div class="rover-card-sub">Gale Crater &bull; Mars Science Laboratory</div>
+          </div>
+          <div class="status-badge active-badge">&#9679; ACTIVE</div>
+        </div>
+        <div class="card-stats">
+          <div class="cstat">
+            <div class="cstat-label">SOL</div>
+            <div class="cstat-value gold" id="curiosity-sol">--</div>
+            <div class="cstat-sub">Mars days since landing</div>
+          </div>
+          <div class="cstat">
+            <div class="cstat-label">DISTANCE DRIVEN</div>
+            <div class="cstat-value" id="curiosity-dist">--</div>
+            <div class="cstat-sub" id="curiosity-dist-fun"></div>
+          </div>
+          <div class="cstat">
+            <div class="cstat-label">TOTAL PHOTOS</div>
+            <div class="cstat-value gold" id="curiosity-photos">--</div>
+          </div>
+          <div class="cstat">
+            <div class="cstat-label">LOCATION</div>
+            <div class="cstat-value small">Mount Sharp</div>
+            <div class="cstat-sub">Gale Crater</div>
+          </div>
+        </div>
+        <div class="card-photo-strip">
+          <div class="cstat-label" style="margin-bottom:0.6rem">LATEST PHOTO FROM MARS</div>
+          <div id="curiosity-latest-photo" class="latest-photo-wrap">Loading...</div>
+        </div>
+        <div class="card-friend">
+          <div class="friend-icon">&#x2622;</div>
+          <div>
+            <div class="friend-name">Nuclear Power</div>
+            <div class="friend-sub">Powered by a radioisotope thermoelectric generator &bull; No solar panels needed</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===== MARS MAP TAB ===== -->
+  <section id="tab-map" class="tab">
+    <div id="map-wrap">
+      <div id="mars-map"></div>
+      <div id="map-legend">
+        <div class="legend-title">ROVER LANDING SITES</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#00d4ff"></span> Perseverance (active)</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#ffa500"></span> Curiosity (active)</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#e8631a"></span> Opportunity</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#e8631a"></span> Spirit</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#c1440e"></span> Sojourner</div>
+        <div style="margin-top:1rem" class="legend-title">TRAVERSE PATH</div>
+        <div id="path-status">Fetching rover paths...</div>
+        <button onclick="replayJourney()" id="replay-btn" style="margin-top:1rem;width:100%">&#9654; REPLAY JOURNEY</button>
+        <div id="replay-info"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PHOTOS TAB ===== -->
+  <section id="tab-photos" class="tab">
+    <div id="photo-controls">
+      <button class="photo-filter active" onclick="filterPhotos('all')">ALL ROVERS</button>
+      <button class="photo-filter" onclick="filterPhotos('perseverance')">PERSEVERANCE</button>
+      <button class="photo-filter" onclick="filterPhotos('curiosity')">CURIOSITY</button>
+      <span id="photo-count-label"></span>
+    </div>
+    <div id="photo-grid"></div>
+    <div id="photo-lightbox" class="hidden" onclick="closeLightbox()">
+      <div id="lightbox-inner">
+        <img id="lightbox-img" src="" alt="Mars photo">
+        <div id="lightbox-info"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== ROVERS TAB ===== -->
+  <section id="tab-rovers" class="tab">
+    <div id="rovers-intro">Five robots. One planet. Millions of discoveries.</div>
+    <div id="rover-cards"></div>
+  </section>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="rovers.js"></script>
+</body>
+</html>
