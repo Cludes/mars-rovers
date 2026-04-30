@@ -1,5 +1,5 @@
-// Falls back to DEMO_KEY when the CI placeholder hasn't been replaced
-const NASA_KEY = (() => { const k = '__NASA_API_KEY__'; return k === '__NASA_API_KEY__' ? 'DEMO_KEY' : k; })();
+// CI injects the real key via sed; falls back to DEMO_KEY if secret not set (empty string)
+const NASA_KEY = '__NASA_API_KEY__' || 'DEMO_KEY';
 const NASA_BASE = 'https://api.nasa.gov/mars-photos/api/v1';
 
 const MARS_SOL = 88775.244; // Earth seconds per Mars sol
@@ -110,7 +110,7 @@ function showTab(name) {
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   document.getElementById('btn-' + name).classList.add('active');
-  if (name === 'map') initMap();
+  if (name === 'map') { initMap(); setTimeout(() => marsMap && marsMap.invalidateSize(), 150); }
   if (name === 'photos') initPhotos();
   if (name === 'rovers') renderRoverCards();
   if (name === 'oppy') animateOppyNumbers();
@@ -269,7 +269,7 @@ function initMap() {
   tiles.on('tileerror', e => { e.tile.style.visibility = 'hidden'; });
 
   // Leaflet needs the container to have a rendered size before it can calculate layout
-  setTimeout(() => marsMap.invalidateSize(), 100);
+  setTimeout(() => marsMap.invalidateSize(), 150);
 
   // Place all rover markers
   for (const [key, r] of Object.entries(ROVERS)) {
