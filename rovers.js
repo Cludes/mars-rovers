@@ -108,7 +108,15 @@ function showTab(name) {
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   document.getElementById('btn-' + name).classList.add('active');
-  if (name === 'map') { requestAnimationFrame(() => requestAnimationFrame(initMap)); }
+  if (name === 'map') {
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      initMap();
+      if (marsMap) {
+        marsMap.invalidateSize({ reset: true });
+        marsMap.setView([0, 90], 2, { animate: false });
+      }
+    }));
+  }
   if (name === 'photos') initPhotos();
   if (name === 'rovers') renderRoverCards();
   if (name === 'oppy') animateOppyNumbers();
@@ -245,7 +253,11 @@ function renderLatestPhotos(containerId, photos) {
 let marsMap, mapInited = false, pathLayers = {}, replayData = {};
 
 function initMap() {
-  if (mapInited) return;
+  if (mapInited) {
+    marsMap.invalidateSize({ reset: true });
+    marsMap.setView([0, 90], 2, { animate: false });
+    return;
+  }
   mapInited = true;
 
   marsMap = L.map('mars-map', {
