@@ -112,6 +112,7 @@ function showTab(name) {
   if (name === 'map') initMap();
   if (name === 'photos') initPhotos();
   if (name === 'rovers') renderRoverCards();
+  if (name === 'oppy') animateOppyNumbers();
 }
 
 // ============================================================
@@ -452,6 +453,27 @@ function renderRoverCards() {
       </div>
     `;
   }).join('');
+}
+
+// ============================================================
+// OPPORTUNITY TRIBUTE
+// ============================================================
+function animateOppyNumbers() {
+  // Animate the 5,498 counter up from 90 for dramatic effect
+  const el = document.querySelector('.oppy-actual');
+  if (!el || el.dataset.animated) return;
+  el.dataset.animated = '1';
+  const target = 5498;
+  const duration = 2000;
+  const start = Date.now();
+  function tick() {
+    const progress = Math.min((Date.now() - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const val = Math.round(90 + (target - 90) * eased);
+    el.textContent = val.toLocaleString();
+    if (progress < 1) requestAnimationFrame(tick);
+  }
+  setTimeout(() => requestAnimationFrame(tick), 400);
 }
 
 // ============================================================

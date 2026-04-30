@@ -550,6 +550,242 @@ button:hover {
   box-shadow: var(--glow-r);
 }
 
+/* ---- DEDICATION ---- */
+#dedication {
+  font-size: 0.65rem;
+  letter-spacing: 0.3rem;
+  color: rgba(196, 122, 69, 0.6);
+  margin-top: 0.25rem;
+  font-style: italic;
+}
+
+/* ---- OPPY NAV BUTTON ---- */
+.oppy-btn { color: #e8631a !important; }
+.oppy-btn.active {
+  color: #e8631a !important;
+  border-bottom-color: #e8631a !important;
+  text-shadow: 0 0 18px rgba(232, 99, 26, 0.7) !important;
+}
+
+/* ---- OPPORTUNITY TAB ---- */
+#tab-oppy { overflow-y: auto; }
+
+#oppy-hero {
+  text-align: center;
+  padding: 2.5rem 2rem 2rem;
+  background: linear-gradient(180deg, rgba(100,30,5,0.3) 0%, transparent 100%);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+#oppy-badge {
+  font-size: 0.6rem;
+  letter-spacing: 0.35rem;
+  color: var(--dim);
+  margin-bottom: 0.5rem;
+}
+
+#oppy-name {
+  font-size: 3rem;
+  font-weight: 700;
+  letter-spacing: 0.8rem;
+  color: var(--white);
+  text-shadow:
+    0 0 20px rgba(232, 99, 26, 0.9),
+    0 0 60px rgba(193, 68, 14, 0.4);
+  margin-bottom: 0.5rem;
+}
+
+#oppy-tagline {
+  font-size: 0.85rem;
+  color: var(--dust);
+  letter-spacing: 0.15rem;
+  margin-bottom: 1.5rem;
+}
+
+#oppy-days-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.oppy-big-num {
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: var(--dim);
+  line-height: 1;
+}
+
+.oppy-actual {
+  color: var(--orange);
+  text-shadow: 0 0 20px rgba(232,99,26,0.6);
+}
+
+.oppy-big-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.18rem;
+  color: var(--dim);
+  text-align: center;
+}
+
+#oppy-arrow {
+  font-size: 2rem;
+  color: var(--mars-red);
+  opacity: 0.6;
+}
+
+#oppy-body { padding: 1.5rem 2rem; overflow-y: auto; }
+
+#oppy-stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.oppy-stat {
+  background: var(--panel);
+  padding: 1.2rem 1.4rem;
+}
+
+.oppy-stat-num {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--orange);
+  text-shadow: 0 0 14px rgba(232,99,26,0.5);
+  line-height: 1;
+  margin-bottom: 0.3rem;
+}
+
+.oppy-unit { font-size: 1rem; }
+.oppy-stat-lbl { font-size: 0.65rem; color: var(--text); margin-bottom: 0.2rem; }
+.oppy-stat-sub { font-size: 0.58rem; color: var(--dim); }
+
+#oppy-cols {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.section-title {
+  font-size: 0.56rem;
+  letter-spacing: 0.25rem;
+  color: var(--dim);
+  margin-bottom: 1rem;
+}
+
+/* Timeline */
+.timeline { position: relative; padding-left: 1.2rem; }
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 5px; top: 8px; bottom: 8px;
+  width: 1px;
+  background: linear-gradient(180deg, var(--orange), var(--mars-red), transparent);
+}
+
+.tl-item {
+  position: relative;
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.tl-dot {
+  position: absolute;
+  left: -1.2rem;
+  top: 4px;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--orange);
+  border: 2px solid var(--mars-red);
+  flex-shrink: 0;
+}
+
+.tl-dot-final {
+  background: var(--mars-red);
+  box-shadow: 0 0 8px rgba(193,68,14,0.6);
+}
+
+.tl-date  { font-size: 0.58rem; color: var(--dust); margin-bottom: 0.2rem; }
+.tl-title { font-size: 0.78rem; color: var(--white); font-weight: 700; margin-bottom: 0.3rem; }
+.tl-desc  { font-size: 0.66rem; color: var(--text); line-height: 1.7; }
+
+/* Right column */
+#oppy-right { display: flex; flex-direction: column; gap: 1.2rem; }
+
+#oppy-last-words {
+  background: rgba(100, 20, 5, 0.3);
+  border: 1px solid rgba(193, 68, 14, 0.5);
+  border-radius: 6px;
+  padding: 1.5rem;
+}
+
+#oppy-quote-label {
+  font-size: 0.55rem;
+  letter-spacing: 0.2rem;
+  color: var(--dim);
+  margin-bottom: 1rem;
+}
+
+#oppy-quote {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--white);
+  line-height: 1.5;
+  margin-bottom: 0.6rem;
+  text-shadow: 0 0 20px rgba(232,99,26,0.4);
+  font-style: italic;
+}
+
+#oppy-quote-credit {
+  font-size: 0.65rem;
+  color: var(--orange);
+  margin-bottom: 0.8rem;
+}
+
+#oppy-quote-note {
+  font-size: 0.65rem;
+  color: var(--dim);
+  line-height: 1.7;
+}
+
+#oppy-still-there, #oppy-alexander-note {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1.2rem 1.4rem;
+}
+
+#oppy-still-there p, #oppy-alexander-note p {
+  font-size: 0.68rem;
+  color: var(--text);
+  line-height: 1.8;
+  margin-bottom: 0.6rem;
+}
+
+#oppy-still-there p:last-child, #oppy-alexander-note p:last-child { margin-bottom: 0; }
+
+#oppy-still-there strong, #oppy-alexander-note strong { color: var(--orange); }
+#oppy-alexander-note em { color: var(--dust); }
+
+#oppy-coords {
+  margin-top: 0.8rem;
+  font-size: 0.6rem;
+  color: var(--dim);
+  border-top: 1px solid var(--border);
+  padding-top: 0.6rem;
+}
+
+#oppy-alexander-note .section-title { color: var(--orange); }
+
 /* ---- LEAFLET ---- */
 .leaflet-container { background: #100400 !important; }
 .leaflet-control-zoom a {

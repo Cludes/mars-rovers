@@ -16,6 +16,7 @@
     <div id="header-inner">
       <div id="mission-label">NASA MARS ROVER MISSION CONTROL</div>
       <h1>MARS ROVERS</h1>
+      <div id="dedication">For Alexander</div>
       <div id="header-stats">
         <span id="perseverance-sol-header"></span>
         <span class="header-sep">|</span>
@@ -30,6 +31,7 @@
     <button id="btn-status"  class="active" onclick="showTab('status')">MISSION STATUS</button>
     <button id="btn-map"     onclick="showTab('map')">MARS MAP</button>
     <button id="btn-photos"  onclick="showTab('photos')">PHOTO FEED</button>
+    <button id="btn-oppy"    onclick="showTab('oppy')" class="oppy-btn">&#9733; OPPORTUNITY</button>
     <button id="btn-rovers"  onclick="showTab('rovers')">THE ROVERS</button>
   </nav>
 
@@ -158,6 +160,148 @@
       <div id="lightbox-inner">
         <img id="lightbox-img" src="" alt="Mars photo">
         <div id="lightbox-info"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== OPPORTUNITY TAB ===== -->
+  <section id="tab-oppy" class="tab">
+
+    <div id="oppy-hero">
+      <div id="oppy-badge">MISSION COMPLETE &bull; 2004 - 2018</div>
+      <div id="oppy-name">OPPORTUNITY</div>
+      <div id="oppy-tagline">Built to last 90 days. Lasted 15 years.</div>
+      <div id="oppy-days-wrap">
+        <div class="oppy-big-num" id="oppy-planned">90</div>
+        <div class="oppy-big-label">days planned</div>
+        <div id="oppy-arrow">&rarr;</div>
+        <div class="oppy-big-num oppy-actual">5,498</div>
+        <div class="oppy-big-label">days actually lived</div>
+      </div>
+    </div>
+
+    <div id="oppy-body">
+
+      <div id="oppy-stats-row">
+        <div class="oppy-stat">
+          <div class="oppy-stat-num">45.16 <span class="oppy-unit">km</span></div>
+          <div class="oppy-stat-lbl">Total distance driven</div>
+          <div class="oppy-stat-sub">That's the first ever Mars Marathon</div>
+        </div>
+        <div class="oppy-stat">
+          <div class="oppy-stat-num">217,594</div>
+          <div class="oppy-stat-lbl">Photos taken</div>
+          <div class="oppy-stat-sub">Sent back from another world</div>
+        </div>
+        <div class="oppy-stat">
+          <div class="oppy-stat-num">61<span class="oppy-unit">x</span></div>
+          <div class="oppy-stat-lbl">Longer than planned</div>
+          <div class="oppy-stat-sub">The greatest overachiever in history</div>
+        </div>
+        <div class="oppy-stat">
+          <div class="oppy-stat-num">835</div>
+          <div class="oppy-stat-lbl">Wake-up calls from Earth</div>
+          <div class="oppy-stat-sub">None were answered</div>
+        </div>
+      </div>
+
+      <div id="oppy-cols">
+
+        <div id="oppy-timeline">
+          <div class="section-title">JOURNEY TIMELINE</div>
+          <div class="timeline">
+            <div class="tl-item">
+              <div class="tl-dot"></div>
+              <div class="tl-content">
+                <div class="tl-date">January 25, 2004 &bull; Sol 1</div>
+                <div class="tl-title">Touchdown on Mars</div>
+                <div class="tl-desc">Bounced to a landing inside tiny Eagle Crater. Engineers called it a "hole-in-one."</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot"></div>
+              <div class="tl-content">
+                <div class="tl-date">Sol 58</div>
+                <div class="tl-title">First evidence of ancient water</div>
+                <div class="tl-desc">Found rock layers that could only have formed in liquid water. Mars had oceans!</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot"></div>
+              <div class="tl-content">
+                <div class="tl-date">Sol 95</div>
+                <div class="tl-title">Mission officially extended</div>
+                <div class="tl-desc">Planned for 90 days. Was doing so well they just... kept going.</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot"></div>
+              <div class="tl-content">
+                <div class="tl-date">2007 &bull; Sol 1,000+</div>
+                <div class="tl-title">Survived a global dust storm</div>
+                <div class="tl-desc">A planet-wide storm blotted out the sun. Oppy went silent for weeks then woke up.</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot"></div>
+              <div class="tl-content">
+                <div class="tl-date">2010 &bull; Sol 2,246</div>
+                <div class="tl-title">Reached Endeavour Crater</div>
+                <div class="tl-desc">Drove 21 km to reach a huge ancient crater. Found the oldest rocks she ever studied.</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot"></div>
+              <div class="tl-content">
+                <div class="tl-date">March 24, 2015 &bull; Sol 3,968</div>
+                <div class="tl-title">First Mars Marathon</div>
+                <div class="tl-desc">Crossed 42.195 km total distance. The first marathon ever run on another planet.</div>
+              </div>
+            </div>
+            <div class="tl-item tl-final">
+              <div class="tl-dot tl-dot-final"></div>
+              <div class="tl-content">
+                <div class="tl-date">June 10, 2018 &bull; Sol 5,111</div>
+                <div class="tl-title">Last contact</div>
+                <div class="tl-desc">A massive global dust storm covered her solar panels. She sent one last signal, then went quiet. NASA tried to wake her 835 times over 8 months.</div>
+              </div>
+            </div>
+            <div class="tl-item tl-final">
+              <div class="tl-dot" style="background:#6b4a35;border-color:#6b4a35"></div>
+              <div class="tl-content">
+                <div class="tl-date">February 13, 2019</div>
+                <div class="tl-title">Farewell, Oppy</div>
+                <div class="tl-desc">Mission officially ended. NASA played "I'll Be Seeing You" as the last transmission to Mars. She is still there today, resting on the rim of Endeavour Crater.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="oppy-right">
+          <div id="oppy-last-words">
+            <div id="oppy-quote-label">FINAL TRANSMISSION &bull; JUNE 10, 2018</div>
+            <div id="oppy-quote">
+              &ldquo;My battery is low<br>and it&rsquo;s getting dark.&rdquo;
+            </div>
+            <div id="oppy-quote-credit">- Opportunity Rover</div>
+            <div id="oppy-quote-note">Oppy had been in a dust storm for weeks. These were the last words she ever sent to Earth. She had survived everything Mars threw at her for 15 years.</div>
+          </div>
+
+          <div id="oppy-still-there">
+            <div class="section-title">WHERE IS SHE NOW?</div>
+            <p>Opportunity is still sitting on Mars right now, on the western rim of Endeavour Crater, in a valley called <strong>Perseverance Valley</strong> &mdash; named years before the rover.</p>
+            <p>Her solar panels are likely covered in dust. But she&rsquo;s still there, exactly where she stopped.</p>
+            <div id="oppy-coords">18.4446&deg;N &nbsp;|&nbsp; Perseverance Valley, Endeavour Crater</div>
+          </div>
+
+          <div id="oppy-alexander-note">
+            <div class="section-title">A NOTE FOR ALEXANDER</div>
+            <p>The rover that came after Oppy &mdash; Perseverance &mdash; was named by a 13-year-old boy called <strong>Alexander Mather</strong>, in a competition open to all American students.</p>
+            <p>He wrote: <em>&ldquo;We are a species of explorers, and we will meet many setbacks on the way to Mars. However, we can persevere.&rdquo;</em></p>
+            <p>Oppy showed us how.</p>
+          </div>
+        </div>
+
       </div>
     </div>
   </section>
