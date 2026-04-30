@@ -108,7 +108,7 @@ function showTab(name) {
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   document.getElementById('btn-' + name).classList.add('active');
-  if (name === 'map') { initMap(); setTimeout(() => marsMap && marsMap.invalidateSize(), 150); }
+  if (name === 'map') { initMap(); setTimeout(() => marsMap && marsMap.invalidateSize(), 300); }
   if (name === 'photos') initPhotos();
   if (name === 'rovers') renderRoverCards();
   if (name === 'oppy') animateOppyNumbers();
@@ -267,7 +267,7 @@ function initMap() {
   tiles.on('tileerror', e => { e.tile.style.visibility = 'hidden'; });
 
   // Leaflet needs the container to have a rendered size before it can calculate layout
-  setTimeout(() => marsMap.invalidateSize(), 150);
+  setTimeout(() => marsMap.invalidateSize(), 300);
 
   // Place all rover markers
   for (const [key, r] of Object.entries(ROVERS)) {

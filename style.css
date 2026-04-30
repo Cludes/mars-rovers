@@ -143,9 +143,17 @@ nav button.active {
 /* ---- TABS ---- */
 .tab { display: none; position: relative; z-index: 1; flex: 1; min-height: 0; }
 .tab.active { display: flex; flex-direction: column; overflow-y: auto; }
-#tab-map.active { overflow: hidden; }
+#tab-map.active { overflow: hidden; flex: 1; }
 
-/* ---- MISSION STATUS ---- */
+/* ---- MAP TAB ---- */
+#map-wrap {
+  display: flex;
+  flex-direction: row;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+#mars-map { flex: 1; min-height: 0; height: 100%; }
 #status-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -271,15 +279,7 @@ nav button.active {
 .friend-icon { font-size: 1.4rem; }
 .friend-name { font-size: 0.7rem; color: var(--text); font-weight: 600; }
 .friend-sub  { font-size: 0.57rem; color: var(--dim); margin-top: 0.12rem; line-height: 1.5; }
-
-/* ---- MAP TAB ---- */
-#map-wrap {
-  display: flex;
-  flex-direction: row;
-  flex: 1; min-height: 0; height: 100%;
-  overflow: hidden;
-}
-#mars-map { flex: 1; min-height: 0; }
+/* ---- MISSION STATUS ---- */
 
 #map-legend {
   width: 220px;

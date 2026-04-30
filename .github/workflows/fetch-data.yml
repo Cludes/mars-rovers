@@ -20,10 +20,10 @@ jobs:
           NASA_API_KEY: ${{ secrets.NASA_API_KEY }}
         run: |
           BASE="https://api.nasa.gov/mars-photos/api/v1"
-          curl -sf "$BASE/manifests/perseverance?api_key=$NASA_API_KEY" > /tmp/pm.json
-          curl -sf "$BASE/manifests/curiosity?api_key=$NASA_API_KEY"    > /tmp/cm.json
-          curl -sf "$BASE/rovers/perseverance/latest_photos?api_key=$NASA_API_KEY" > /tmp/pp.json
-          curl -sf "$BASE/rovers/curiosity/latest_photos?api_key=$NASA_API_KEY"    > /tmp/cp.json
+          curl -s "$BASE/manifests/perseverance?api_key=$NASA_API_KEY" > /tmp/pm.json || echo '{}' > /tmp/pm.json
+          curl -s "$BASE/manifests/curiosity?api_key=$NASA_API_KEY"    > /tmp/cm.json || echo '{}' > /tmp/cm.json
+          curl -s "$BASE/rovers/perseverance/latest_photos?api_key=$NASA_API_KEY" > /tmp/pp.json || echo '{}' > /tmp/pp.json
+          curl -s "$BASE/rovers/curiosity/latest_photos?api_key=$NASA_API_KEY"    > /tmp/cp.json || echo '{}' > /tmp/cp.json
           python3 - <<'PYEOF'
           import json, sys
           from datetime import datetime, timezone
