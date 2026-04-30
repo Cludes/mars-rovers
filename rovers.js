@@ -108,7 +108,7 @@ function showTab(name) {
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   document.getElementById('btn-' + name).classList.add('active');
-  if (name === 'map') { initMap(); }
+  if (name === 'map') { requestAnimationFrame(() => requestAnimationFrame(initMap)); }
   if (name === 'photos') initPhotos();
   if (name === 'rovers') renderRoverCards();
   if (name === 'oppy') animateOppyNumbers();
@@ -246,15 +246,6 @@ let marsMap, mapInited = false, pathLayers = {}, replayData = {};
 
 function initMap() {
   if (mapInited) return;
-
-  // Don't create the Leaflet map until the container has a real height.
-  // If the tab just became visible, the browser may not have laid it out yet.
-  const mapEl = document.getElementById('mars-map');
-  if (mapEl.offsetHeight === 0) {
-    requestAnimationFrame(initMap);
-    return;
-  }
-
   mapInited = true;
 
   marsMap = L.map('mars-map', {

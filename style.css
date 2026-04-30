@@ -141,19 +141,19 @@ nav button.active {
 .oppy-btn.active { color: var(--gold) !important; border-bottom-color: var(--gold) !important; }
 
 /* ---- TABS ---- */
-.tab { display: none; position: relative; z-index: 1; flex: 1; min-height: 0; }
-.tab.active { display: flex; flex-direction: column; overflow-y: auto; }
-#tab-map.active { overflow: hidden; flex: 1; }
+.tab { display: none; }
+.tab.active { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow-y: auto; position: relative; z-index: 1; }
+#tab-map.active { overflow: hidden; }
 
 /* ---- MAP TAB ---- */
 #map-wrap {
   display: flex;
   flex-direction: row;
-  position: absolute;
-  inset: 0;
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
 }
-#mars-map { flex: 1; min-height: 0; height: 100%; }
+#mars-map { flex: 1; min-height: 0; }
 #status-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
